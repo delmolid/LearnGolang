@@ -1,6 +1,6 @@
 package main
 import "fmt"
-// Strings, which can be added together with +. Integers and floats. Booleans, with boolean operators as you’d expect.
+// Strings, which can be added together with +. Integers and floats. Booleans, with boolean operators as you'd expect.
 func main() {
 	// fmt.Println("go" + "lang")
 	// fmt.Println("1+1 =", 1+1)
