@@ -1,0 +1,258 @@
+# NOTES D'APPRENTISSAGE GO
+
+## 1. PACKAGE FMT - FORMATAGE ET AFFICHAGE
+
+### Import
+import "fmt"
+
+### Fonctions principales d'affichage
+- fmt.Print()    : Affiche sans saut de ligne
+- fmt.Println()  : Affiche avec saut de ligne automatique + espaces entre arguments
+- fmt.Printf()   : Affichage avec formatage personnalisé
+
+### Verbes de formatage courants
+%s - string (chaîne de caractères)
+%d - int (entier décimal)
+%f - float (nombre décimal)
+%t - bool (booléen true/false)
+%v - any (valeur par défaut)
+%T - any (type de la variable)
+
+### Autres fonctions utiles
+- fmt.Sprintf() : Formatage sans affichage (retourne une string)
+- fmt.Scan()    : Lecture d'entrée utilisateur
+
+### Exemples
+fmt.Println("Hello World")                    // Hello World
+fmt.Printf("Je m'appelle %s\n", "Alice")     // Je m'appelle Alice
+fmt.Printf("Age: %d ans\n", 25)              // Age: 25 ans
+
+## 2. VARIABLES EN GO
+
+### Déclaration avec var
+var a = "initial"           // Type inféré
+var b, c int = 1, 2        // Déclaration multiple avec type explicite
+var d = true               // Booléen
+var e int                  // Valeur zéro (0 pour int)
+
+### Déclaration courte avec :=
+f := "apple"               // Équivalent à var f = "apple"
+
+### Valeurs zéro par défaut
+- int: 0
+- string: ""
+- bool: false
+- float: 0.0
+
+## 2.1 CONSTANTES EN GO
+
+### Déclaration de constantes
+const s string = "constant"     // Constante typée
+const n = 500000000            // Constante non typée (plus flexible)
+const pi = 3.14159             // Constante numérique
+
+### Constantes typées vs non typées
+- Constante typée : const typedConst int = 42
+- Constante non typée : const untypedConst = 42 (plus flexible)
+
+### Caractéristiques des constantes
+- IMMUTABLES : Ne peuvent jamais être modifiées
+- ÉVALUÉES À LA COMPILATION : Valeurs calculées avant l'exécution
+- EXPRESSIONS CONSTANTES : Peuvent être des calculs avec des valeurs constantes
+- CONVERSION AUTOMATIQUE : Les constantes non typées s'adaptent au contexte
+
+### Types de constantes possibles
+- Booléens : const isActive = true
+- Chaînes : const message = "Hello"
+- Numériques : const pi = 3.14159
+- Caractères : const letter = 'A'
+
+### Avantages des constantes non typées
+- Flexibilité avec différents types numériques
+- Précision arbitraire dans les calculs
+- Conversion automatique selon le contexte
+
+### Exemples d'utilisation
+const d = 3e20 / n                    // Calcul à la compilation
+fmt.Println(int64(d))                 // Conversion vers int64
+fmt.Println(math.Sin(n))              // Conversion automatique vers float64
+
+### Notation scientifique
+3e20 = 3 × 10²⁰ = 300000000000000000000
+
+## 3. TYPES DE DONNÉES DE BASE
+
+### Strings
+- Concaténation avec +
+- Exemple: "go" + "lang" = "golang"
+
+### Entiers et flottants
+- Opérations arithmétiques: +, -, *, /
+- Exemple: 1+1 = 2, 7.0/3.0 = 2.333...
+
+### Booléens
+- Opérateurs logiques:
+  - && (ET logique)
+  - || (OU logique)
+  - !  (NON logique)
+- Exemple: true && false = false
+
+## 4. CONDITIONS ET STRUCTURES DE CONTRÔLE
+
+### 4.1 Structure if/else if/else
+if condition1 {
+    // code si condition1 est vraie
+} else if condition2 {
+    // code si condition2 est vraie
+} else {
+    // code si aucune condition n'est vraie
+}
+
+### 4.2 Opérateurs de comparaison
+- == : égal à
+- != : différent de
+- <  : inférieur à
+- <= : inférieur ou égal à
+- >  : supérieur à
+- >= : supérieur ou égal à
+
+### 4.3 Opérateurs logiques
+- && : ET logique (AND)
+- || : OU logique (OR)
+- !  : NON logique (NOT)
+
+### 4.4 if avec déclaration courte
+if variable := valeur; condition {
+    // variable est accessible ici seulement
+}
+// variable n'est plus accessible ici
+
+### Exemple pratique
+if num := 9; num < 0 {
+    fmt.Println(num, "is negative")
+} else if num < 10 {
+    fmt.Println(num, "has 1 digit")
+} else {
+    fmt.Println(num, "has multiple digits")
+}
+// Sortie: 9 has 1 digit
+
+### 4.5 Tests de parité et divisibilité
+// Test de parité
+if 7%2 == 0 {
+    fmt.Println("7 is even")
+} else {
+    fmt.Println("7 is odd")  // Cette branche s'exécute
+}
+
+// Test de divisibilité
+if 8%4 == 0 {
+    fmt.Println("8 is divisible by 4")  // Cette condition est vraie
+}
+
+// Condition avec OR
+if 8%2 == 0 || 7%2 == 0 {
+    fmt.Println("either 8 or 7 are even")  // true || false = true
+}
+
+### Avantages de la déclaration courte dans if
+- Portée limitée : la variable n'existe que dans le bloc if/else
+- Code plus propre : évite la pollution de l'espace de noms
+- Lisibilité : la logique est contenue dans le bloc
+
+## 5. BOUCLES ET STRUCTURES DE CONTRÔLE
+
+### Types de boucles for en Go
+Go n'a qu'un seul type de boucle : for (remplace while, do-while, etc.)
+
+### 5.1 Boucle for basique (style while)
+i := 1
+for i <= 3 {
+    fmt.Println(i)
+    i = i + 1
+}
+// Sortie: 1, 2, 3
+
+### 5.2 Boucle for style C
+for j := 0; j < 3; j++ {
+    fmt.Println("range", j)
+}
+// Structure: for initialisation; condition; post-statement
+// Sortie: range 0, range 1, range 2
+
+### 5.3 Boucle for range avec entier (Go 1.22+)
+for i := range 3 {
+    fmt.Println("range", i)
+}
+// range 3 génère les valeurs 0, 1, 2
+// Plus concis que for i := 0; i < 3; i++
+
+### 5.4 Boucle infinie
+for {
+    fmt.Println("loop")
+    break  // Sort de la boucle
+}
+
+### 5.5 Mots-clés de contrôle
+- break    : Sort complètement de la boucle
+- continue : Passe à l'itération suivante
+
+### Exemple avec continue
+for n := range 6 {
+    if n%2 == 0 {  // Si n est pair
+        continue   // Passe à l'itération suivante
+    }
+    fmt.Println(n) // Affiche seulement les impairs
+}
+// Sortie: 1, 3, 5
+
+### Opérateur modulo %
+- n % 2 : reste de la division de n par 2
+- Si reste = 0 → nombre pair
+- Si reste = 1 → nombre impair
+
+## 6. STRUCTURE D'UN PROGRAMME GO
+
+```go
+package main           // Déclaration du package
+import "fmt"          // Import des packages nécessaires
+
+func main() {         // Fonction principale
+    // Code ici
+}
+```
+
+## 7. BONNES PRATIQUES
+
+- Utilisez := pour les nouvelles variables dans les fonctions
+- Utilisez var pour les variables au niveau package
+- Utilisez const pour les valeurs qui ne changent jamais
+- Préférez les constantes non typées pour plus de flexibilité
+- Groupez les constantes liées avec const ()
+- Nommez les constantes en MAJUSCULES pour les exports publics
+- Utilisez if avec déclaration courte pour limiter la portée des variables
+- Utilisez l'opérateur modulo % pour tester la parité et la divisibilité
+- Combinez les conditions avec &&, || et !
+- Utilisez for range avec des entiers pour des boucles simples (Go 1.22+)
+- Utilisez continue pour filtrer dans les boucles
+- Utilisez break pour sortir des boucles infinies
+- fmt.Println() pour l'affichage simple
+- fmt.Printf() pour l'affichage formaté
+- Commentez votre code avec //
+
+## 8. RESSOURCES D'APPRENTISSAGE
+
+### Officielles
+- Tour of Go: https://go.dev/tour/
+- Go by Example: https://gobyexample.com/
+- Documentation: https://go.dev/doc/
+
+### Avec certificats
+- Coursera: "Programming with Google Go Specialization"
+- edX: "Introduction to Programming with Go"
+- Pluralsight: "Go Path"
+
+### Livres recommandés
+- "The Go Programming Language" (Donovan & Kernighan)
+- "Go in Action" (Manning)
+- "Learning Go" (O'Reilly) 
