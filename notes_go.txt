@@ -97,6 +97,90 @@ fmt.Println(math.Sin(n))              // Conversion automatique vers float64
   - !  (NON logique)
 - Exemple: true && false = false
 
+## 3.1 TABLEAUX (ARRAYS) EN GO
+
+### Caractéristiques des tableaux
+- TAILLE FIXE : Définie à la compilation
+- TYPE HOMOGÈNE : Tous les éléments du même type
+- INDEXATION : Commence à 0
+- VALEURS PAR DÉFAUT : Zéro pour le type (0 pour int, "" pour string)
+
+### 3.1.1 Déclaration de tableaux
+
+### Déclaration avec taille explicite
+var arr [5]int                        // Tableau de 5 entiers, initialisé à [0 0 0 0 0]
+
+### Déclaration avec initialisation
+arr := [5]int{1, 2, 3, 4, 5}         // Tableau avec valeurs initiales
+
+### Taille automatique
+arr := [...]int{1, 2, 3, 4, 5}       // Go calcule automatiquement la taille (5)
+
+### 3.1.2 Opérations sur les tableaux
+
+### Accès aux éléments
+element := arr[2]                     // Récupère l'élément à l'index 2
+arr[4] = 100                         // Modifie l'élément à l'index 4
+
+### Longueur du tableau
+length := len(arr)                    // Retourne la taille du tableau
+
+### Parcours avec range (index et valeur)
+for i, value := range arr {
+    fmt.Printf("Index: %d, Valeur: %d\n", i, value)
+}
+
+### Parcours avec range (index seulement)
+for i := range arr {
+    fmt.Printf("Index: %d, Valeur: %d\n", i, arr[i])
+}
+
+### 3.1.3 Tableaux multidimensionnels
+
+### Déclaration tableau 2D
+var matrix [2][3]int                  // 2 lignes, 3 colonnes
+
+### Initialisation avec boucles
+for i := range 2 {
+    for j := range 3 {
+        matrix[i][j] = i + j          // Remplit avec la somme des indices
+    }
+}
+// Résultat: [[0 1 2] [1 2 3]]
+
+### Initialisation directe
+matrix := [2][3]int{
+    {1, 2, 3},                        // Première ligne
+    {4, 5, 6},                        // Deuxième ligne
+}
+
+### Accès aux éléments 2D
+element := matrix[1][2]               // Élément ligne 1, colonne 2
+matrix[0][1] = 10                     // Modification d'un élément
+
+### 3.1.4 Exemples pratiques
+
+### Tableau simple
+var scores [5]int
+scores[0] = 95
+scores[1] = 87
+fmt.Println("Scores:", scores)        // [95 87 0 0 0]
+fmt.Println("Longueur:", len(scores)) // 5
+
+### Tableau avec valeurs
+names := [3]string{"Alice", "Bob", "Charlie"}
+for i, name := range names {
+    fmt.Printf("Personne %d: %s\n", i+1, name)
+}
+
+### Matrice 2D pratique
+var grid [3][3]int
+// Remplir la diagonale
+for i := range 3 {
+    grid[i][i] = 1
+}
+fmt.Println("Matrice identité:", grid) // [[1 0 0] [0 1 0] [0 0 1]]
+
 ## 4. CONDITIONS ET STRUCTURES DE CONTRÔLE
 
 ### 4.1 Structure if/else if/else
@@ -160,6 +244,75 @@ if 8%2 == 0 || 7%2 == 0 {
 - Code plus propre : évite la pollution de l'espace de noms
 - Lisibilité : la logique est contenue dans le bloc
 
+### 4.6 SWITCH - Alternative élégante à if/else
+
+### Types de switch en Go
+1. Switch classique : switch variable { case valeur: }
+2. Switch conditionnel : switch { case condition: }
+3. Type switch : switch variable.(type) { case type: }
+
+### 4.6.1 Switch basique
+i := 2
+switch i {
+case 1:
+    fmt.Println("One")
+case 2:
+    fmt.Println("Two")    // Cette branche s'exécute
+case 3:
+    fmt.Println("Three")
+}
+
+### 4.6.2 Switch avec cases multiples
+switch time.Now().Weekday() {
+case time.Saturday, time.Sunday:
+    fmt.Println("It's the weekend")
+default:
+    fmt.Println("It's weekday")
+}
+
+### 4.6.3 Switch sans expression (conditionnel)
+t := time.Now()
+switch {
+case t.Hour() < 12:
+    fmt.Println("It's before noon")
+default:
+    fmt.Println("It's after noon")
+}
+// Équivalent à switch true
+
+### 4.6.4 Type Switch
+whatAmI := func(i interface{}) {
+    switch t := i.(type) {
+    case bool:
+        fmt.Println("I'm a bool")
+    case int:
+        fmt.Println("I'm a int")
+    default:
+        fmt.Printf("Don't Know type %T\n", t)
+    }
+}
+whatAmI(true)   // I'm a bool
+whatAmI(1)      // I'm a int
+whatAmI("hey")  // Don't Know type string
+
+### Caractéristiques du switch en Go
+- PAS DE BREAK nécessaire (pas de fall-through automatique)
+- Cases multiples : case a, b, c:
+- Conditions dans les cases : case x > 10:
+- default : cas par défaut optionnel
+- Type switching unique à Go
+
+### interface{} (type vide)
+- Peut contenir n'importe quelle valeur
+- Utilisé pour les fonctions génériques
+- i.(type) : syntaxe pour obtenir le type concret
+
+### Avantages du switch
+- Plus lisible que de multiples if/else
+- Performance optimisée
+- Support natif des types
+- Pas de risque d'oubli de break
+
 ## 5. BOUCLES ET STRUCTURES DE CONTRÔLE
 
 ### Types de boucles for en Go
@@ -187,13 +340,31 @@ for i := range 3 {
 // range 3 génère les valeurs 0, 1, 2
 // Plus concis que for i := 0; i < 3; i++
 
-### 5.4 Boucle infinie
+### 5.4 Boucle for range avec tableaux
+arr := [3]int{10, 20, 30}
+
+// Avec index et valeur
+for i, value := range arr {
+    fmt.Printf("arr[%d] = %d\n", i, value)
+}
+
+// Avec index seulement
+for i := range arr {
+    fmt.Printf("Index: %d\n", i)
+}
+
+// Avec valeur seulement (utiliser _)
+for _, value := range arr {
+    fmt.Printf("Valeur: %d\n", value)
+}
+
+### 5.5 Boucle infinie
 for {
     fmt.Println("loop")
     break  // Sort de la boucle
 }
 
-### 5.5 Mots-clés de contrôle
+### 5.6 Mots-clés de contrôle
 - break    : Sort complètement de la boucle
 - continue : Passe à l'itération suivante
 
@@ -211,7 +382,32 @@ for n := range 6 {
 - Si reste = 0 → nombre pair
 - Si reste = 1 → nombre impair
 
-## 6. STRUCTURE D'UN PROGRAMME GO
+## 6. FONCTIONS
+
+### 6.1 Fonction main()
+- Point d'entrée obligatoire du programme
+- Pas de paramètres : func main()
+- Pas de valeur de retour
+- Le programme commence et se termine avec main()
+
+### 6.2 Fonctions personnalisées
+func nomFonction(paramètres) typeRetour {
+    // corps de la fonction
+    return valeur
+}
+
+### 6.3 Fonctions anonymes
+variable := func(paramètres) typeRetour {
+    // corps de la fonction
+    return valeur
+}
+
+### Exemple de fonction avec retour
+func Now() time.Time {
+    return time.Now()
+}
+
+## 7. STRUCTURE D'UN PROGRAMME GO
 
 ```go
 package main           // Déclaration du package
@@ -222,7 +418,7 @@ func main() {         // Fonction principale
 }
 ```
 
-## 7. BONNES PRATIQUES
+## 8. BONNES PRATIQUES
 
 - Utilisez := pour les nouvelles variables dans les fonctions
 - Utilisez var pour les variables au niveau package
@@ -231,16 +427,22 @@ func main() {         // Fonction principale
 - Groupez les constantes liées avec const ()
 - Nommez les constantes en MAJUSCULES pour les exports publics
 - Utilisez if avec déclaration courte pour limiter la portée des variables
+- Préférez switch à de multiples if/else pour la lisibilité
+- Utilisez Type Switch pour gérer différents types
 - Utilisez l'opérateur modulo % pour tester la parité et la divisibilité
 - Combinez les conditions avec &&, || et !
-- Utilisez for range avec des entiers pour des boucles simples (Go 1.22+)
+- Utilisez for range pour parcourir les tableaux
+- Utilisez _ pour ignorer les valeurs non utilisées dans range
+- Initialisez les tableaux avec [...] pour une taille automatique
+- Utilisez des boucles imbriquées pour les tableaux multidimensionnels
 - Utilisez continue pour filtrer dans les boucles
 - Utilisez break pour sortir des boucles infinies
+- Appelez vos fonctions depuis main() pour qu'elles s'exécutent
 - fmt.Println() pour l'affichage simple
 - fmt.Printf() pour l'affichage formaté
 - Commentez votre code avec //
 
-## 8. RESSOURCES D'APPRENTISSAGE
+## 9. RESSOURCES D'APPRENTISSAGE
 
 ### Officielles
 - Tour of Go: https://go.dev/tour/
