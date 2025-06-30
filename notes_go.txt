@@ -339,6 +339,220 @@ s := []string{"a", "b", "d", "e"}
 i := 2  // Insérer "c" à l'index 2
 s = append(s[:i], append([]string{"c"}, s[i:]...)...)  // [a b c d e]
 
+## 3.3 MAPS (CARTES/DICTIONNAIRES) EN GO
+
+### Qu'est-ce qu'une map ?
+- STRUCTURE CLÉ-VALEUR : Associe des clés uniques à des valeurs
+- NON ORDONNÉE : L'ordre des éléments n'est pas garanti
+- TYPE DE RÉFÉRENCE : Comme les slices et channels
+- ÉQUIVALENT : Dictionnaire, HashMap, Table de hachage
+
+### 3.3.1 Création de maps
+
+### Avec make()
+m := make(map[string]int)             // Map vide clé=string, valeur=int
+m := make(map[string]int, 10)         // Avec capacité initiale (optimisation)
+
+### Map littérale
+m := map[string]int{
+    "alice": 25,
+    "bob":   30,
+    "charlie": 35,
+}
+
+### Map vide avec type
+var m map[string]int                  // Map nil (doit être initialisée avant usage)
+m = make(map[string]int)              // Initialisation nécessaire
+
+### 3.3.2 Opérations de base
+
+### Ajout et modification
+m["clé"] = valeur                     // Ajoute ou modifie
+m["alice"] = 26                       // Modifie la valeur existante
+m["diana"] = 28                       // Ajoute une nouvelle entrée
+
+### Accès aux valeurs
+valeur := m["alice"]                  // Récupère la valeur (26)
+valeur := m["inexistante"]            // Retourne valeur zéro du type (0 pour int)
+
+### Accès avec vérification d'existence
+valeur, existe := m["alice"]
+if existe {
+    fmt.Printf("Alice a %d ans\n", valeur)
+} else {
+    fmt.Println("Alice non trouvée")
+}
+
+### Longueur de la map
+taille := len(m)                      // Nombre de paires clé-valeur
+
+### 3.3.3 Suppression et nettoyage
+
+### Suppression d'un élément
+delete(m, "bob")                      // Supprime la paire clé-valeur
+delete(m, "inexistante")              // Pas d'erreur si la clé n'existe pas
+
+### Vider complètement une map (Go 1.21+)
+clear(m)                              // Supprime tous les éléments
+fmt.Println(len(m))                   // 0
+
+### 3.3.4 Parcours de maps
+
+### Parcours clé-valeur
+for clé, valeur := range m {
+    fmt.Printf("%s: %d\n", clé, valeur)
+}
+
+### Parcours clés seulement
+for clé := range m {
+    fmt.Printf("Clé: %s\n", clé)
+}
+
+### Parcours valeurs seulement
+for _, valeur := range m {
+    fmt.Printf("Valeur: %d\n", valeur)
+}
+
+### Note sur l'ordre
+// L'ordre de parcours est ALÉATOIRE et peut changer entre les exécutions
+
+### 3.3.5 Comparaison de maps
+
+### Avec le package maps (Go 1.21+)
+import "maps"
+
+m1 := map[string]int{"foo": 1, "bar": 2}
+m2 := map[string]int{"foo": 1, "bar": 2}
+if maps.Equal(m1, m2) {              // Compare le contenu
+    fmt.Println("Maps identiques")
+}
+
+### Comparaison manuelle (versions antérieures)
+func mapsEqual(m1, m2 map[string]int) bool {
+    if len(m1) != len(m2) {
+        return false
+    }
+    for k, v1 := range m1 {
+        if v2, ok := m2[k]; !ok || v1 != v2 {
+            return false
+        }
+    }
+    return true
+}
+
+### 3.3.6 Types de maps courantes
+
+### Map string vers int (compteurs)
+compteurs := map[string]int{
+    "pommes":  5,
+    "oranges": 3,
+}
+
+### Map string vers bool (ensembles)
+ensemble := map[string]bool{
+    "alice": true,
+    "bob":   true,
+}
+
+### Map int vers string (index vers nom)
+noms := map[int]string{
+    1: "premier",
+    2: "deuxième",
+    3: "troisième",
+}
+
+### Map string vers slice (groupement)
+groupes := map[string][]string{
+    "fruits":   {"pomme", "orange", "banane"},
+    "légumes":  {"carotte", "brocoli"},
+}
+
+### 3.3.7 Exemples pratiques
+
+### Comptage d'occurrences
+text := "hello world hello"
+compteur := make(map[string]int)
+mots := strings.Fields(text)
+for _, mot := range mots {
+    compteur[mot]++                   // Incrémente le compteur
+}
+// Résultat: map[hello:2 world:1]
+
+### Vérification d'appartenance (ensemble)
+autorisés := map[string]bool{
+    "admin": true,
+    "user":  true,
+}
+if autorisés["admin"] {
+    fmt.Println("Accès autorisé")
+}
+
+### Cache/mémoisation
+cache := make(map[int]int)
+func fibonacci(n int) int {
+    if n <= 1 {
+        return n
+    }
+    if val, ok := cache[n]; ok {
+        return val                    // Valeur en cache
+    }
+    result := fibonacci(n-1) + fibonacci(n-2)
+    cache[n] = result                 // Mise en cache
+    return result
+}
+
+### Regroupement de données
+personnes := []struct{nom string; age int}{
+    {"Alice", 25}, {"Bob", 30}, {"Charlie", 25},
+}
+parAge := make(map[int][]string)
+for _, p := range personnes {
+    parAge[p.age] = append(parAge[p.age], p.nom)
+}
+// Résultat: map[25:[Alice Charlie] 30:[Bob]]
+
+### 3.3.8 Maps imbriquées
+
+### Map de maps
+utilisateurs := map[string]map[string]interface{}{
+    "alice": {
+        "age":    25,
+        "email":  "alice@example.com",
+        "active": true,
+    },
+    "bob": {
+        "age":    30,
+        "email":  "bob@example.com", 
+        "active": false,
+    },
+}
+
+### Accès aux données imbriquées
+if user, ok := utilisateurs["alice"]; ok {
+    if age, ok := user["age"].(int); ok {
+        fmt.Printf("Alice a %d ans\n", age)
+    }
+}
+
+### 3.3.9 Gestion d'erreurs avec maps
+
+### Vérification avant accès
+func getUser(id string, users map[string]User) (User, error) {
+    user, exists := users[id]
+    if !exists {
+        return User{}, fmt.Errorf("utilisateur %s non trouvé", id)
+    }
+    return user, nil
+}
+
+### Pattern d'initialisation sûre
+func safeMapAccess(m map[string]int, key string) int {
+    if m == nil {
+        return 0
+    }
+    return m[key]  // Retourne 0 si la clé n'existe pas
+}
+
 ## 4. CONDITIONS ET STRUCTURES DE CONTRÔLE
 
 ### 4.1 Structure if/else if/else
@@ -534,13 +748,31 @@ for _, value := range s {
     fmt.Println("Valeur:", value)
 }
 
-### 5.6 Boucle infinie
+### 5.6 Boucle for range avec maps
+m := map[string]int{"a": 1, "b": 2, "c": 3}
+
+// Parcours clé-valeur
+for clé, valeur := range m {
+    fmt.Printf("%s: %d\n", clé, valeur)
+}
+
+// Parcours clés seulement
+for clé := range m {
+    fmt.Printf("Clé: %s\n", clé)
+}
+
+// Parcours valeurs seulement (rare)
+for _, valeur := range m {
+    fmt.Printf("Valeur: %d\n", valeur)
+}
+
+### 5.7 Boucle infinie
 for {
     fmt.Println("loop")
     break  // Sort de la boucle
 }
 
-### 5.7 Mots-clés de contrôle
+### 5.8 Mots-clés de contrôle
 - break    : Sort complètement de la boucle
 - continue : Passe à l'itération suivante
 
@@ -612,6 +844,12 @@ func main() {         // Fonction principale
 - Utilisez append() pour ajouter des éléments aux slices
 - Utilisez copy() pour copier des slices
 - Utilisez slices.Equal() pour comparer des slices (Go 1.21+)
+- Utilisez maps pour les associations clé-valeur
+- Vérifiez l'existence des clés avec la syntaxe value, ok := map[key]
+- Utilisez delete() pour supprimer des éléments de maps
+- Utilisez clear() pour vider complètement une map (Go 1.21+)
+- Utilisez maps.Equal() pour comparer des maps (Go 1.21+)
+- Initialisez les maps avec make() ou des littéraux
 - Utilisez for range pour parcourir les collections
 - Utilisez _ pour ignorer les valeurs non utilisées dans range
 - Pré-allouez la capacité des slices si vous connaissez la taille approximative
