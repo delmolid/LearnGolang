@@ -798,13 +798,76 @@ for n := range 6 {
 - Pas de valeur de retour
 - Le programme commence et se termine avec main()
 
-### 6.2 Fonctions personnalisées
+### 6.2 Déclaration de fonctions
 func nomFonction(paramètres) typeRetour {
     // corps de la fonction
     return valeur
 }
 
-### 6.3 Fonctions anonymes
+### 6.3 Fonctions avec paramètres
+func add(num1 int, num2 int) int {
+    return num1 + num2
+}
+
+### Syntaxe courte pour paramètres du même type
+func plusadd(num1, num2, num3 int) int {
+    return num1 + num2 + num3
+}
+
+### 6.4 Fonctions avec retours multiples
+func vals() (int, int) {
+    return 3, 7
+}
+
+### Utilisation des retours multiples
+a, b := vals()              // Récupère les deux valeurs
+fmt.Println(a)              // 3
+fmt.Println(b)              // 7
+
+### Ignorer une valeur avec _
+_, c := vals()              // Ignore la première valeur
+fmt.Println(c)              // 7
+
+### 6.5 Fonctions variadiques
+func sum(nums ...int) {
+    total := 0
+    for _, num := range nums {
+        total += num
+    }
+    fmt.Println(total)
+}
+
+### Appel de fonctions variadiques
+sum(1, 2)                   // 2 arguments
+sum(1, 2, 3)               // 3 arguments
+sum(1, 2, 3, 4, 5)         // 5 arguments
+
+### Expansion d'une slice avec ...
+nums := []int{1, 2, 3, 4}
+sum(nums...)               // Équivalent à sum(1, 2, 3, 4)
+
+### 6.6 Caractéristiques des fonctions variadiques
+- SYNTAXE : func nom(param ...type)
+- FLEXIBILITÉ : Nombre variable d'arguments
+- CONVERSION : Le paramètre devient une slice []type
+- POSITION : Doit être le dernier paramètre
+- UNICITÉ : Une seule fonction variadique par fonction
+
+### 6.7 Exemples de fonctions variadiques courantes
+fmt.Println("a", "b", "c")           // Affichage multiple
+fmt.Printf("%s %s", "hello", "world") // Formatage
+append(slice, elem1, elem2, elem3)    // Ajout multiple
+
+### 6.8 Fonctions avec paramètres mixtes
+func greet(greeting string, names ...string) {
+    for _, name := range names {
+        fmt.Printf("%s %s!\n", greeting, name)
+    }
+}
+
+greet("Hello", "Alice", "Bob")       // Hello Alice! Hello Bob!
+
+### 6.9 Fonctions anonymes
 variable := func(paramètres) typeRetour {
     // corps de la fonction
     return valeur
