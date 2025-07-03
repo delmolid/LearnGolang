@@ -878,6 +878,400 @@ func Now() time.Time {
     return time.Now()
 }
 
+### 6.10 CLOSURES (FERMETURES) EN GO
+
+### Qu'est-ce qu'une closure ?
+Une closure est une fonction qui :
+- Est définie à l'intérieur d'une autre fonction
+- CAPTURE et mémorise les variables de son environnement
+- Peut accéder et modifier ces variables même après la fin de la fonction parente
+
+### 6.10.1 Exemple basique de closure
+
+### Générateur de séquence
+func intSeq() func() int {
+    i := 0                    // Variable capturée
+    return func() int {       // Fonction anonyme (closure)
+        i++                   // Accède à la variable 'i' capturée
+        return i
+    }
+}
+
+### Utilisation
+nextInt := intSeq()           // Crée une closure
+fmt.Println(nextInt())        // 1
+fmt.Println(nextInt())        // 2
+fmt.Println(nextInt())        // 3
+
+### 6.10.2 Indépendance des closures
+newInts := intSeq()           // Nouvelle closure indépendante
+fmt.Println(newInts())        // 1 (nouvelle variable i)
+fmt.Println(newInts())        // 2
+
+### 6.10.3 Closure avec paramètres
+
+### Multiplicateur configuré
+func makeMultiplier(factor int) func(int) int {
+    return func(x int) int {
+        return x * factor     // 'factor' est capturé
+    }
+}
+
+double := makeMultiplier(2)   // Closure avec factor=2
+triple := makeMultiplier(3)   // Closure avec factor=3
+fmt.Println(double(5))        // 10
+fmt.Println(triple(5))        // 15
+
+### 6.10.4 Accumulateur avec closure
+func makeAccumulator() func(int) int {
+    sum := 0                  // État persistant
+    return func(value int) int {
+        sum += value          // Modification de l'état
+        return sum
+    }
+}
+
+acc := makeAccumulator()
+fmt.Println(acc(1))           // 1
+fmt.Println(acc(2))           // 3
+fmt.Println(acc(3))           // 6
+
+### 6.10.5 Concepts clés des closures
+
+### Capture de variables
+- La closure "se souvient" des variables de son environnement
+- Les variables restent vivantes tant que la closure existe
+
+### État persistant
+- Chaque closure maintient son propre état
+- Les variables capturées conservent leurs valeurs entre les appels
+
+### Encapsulation
+- Les variables capturées ne sont accessibles que via la closure
+- Impossible d'accéder directement aux variables depuis l'extérieur
+
+### Indépendance
+- Chaque appel à la fonction génératrice crée une nouvelle closure
+- Chaque closure a ses propres variables capturées
+
+### 6.10.6 Avantages des closures
+
+### Encapsulation des données
+- Données privées et protégées
+- Seule la closure peut les modifier
+
+### Alternative aux variables globales
+- État persistant sans pollution globale
+- Chaque instance maintient son propre état
+
+### Flexibilité et réutilisabilité
+- Permet de créer des fonctions spécialisées
+- Pattern de programmation fonctionnelle
+
+### Code concis
+- Plus simple que les structures avec méthodes
+- Interface claire et intuitive
+
+### 6.10.7 Cas d'usage courants
+
+### Générateurs
+func makeRange(start, end int) func() (int, bool) {
+    current := start
+    return func() (int, bool) {
+        if current >= end {
+            return 0, false
+        }
+        val := current
+        current++
+        return val, true
+    }
+}
+
+### Configuration de fonctions
+func makeValidator(minLength int) func(string) bool {
+    return func(input string) bool {
+        return len(input) >= minLength
+    }
+}
+
+### Cache/Mémoisation
+func memoize(fn func(int) int) func(int) int {
+    cache := make(map[int]int)
+    return func(x int) int {
+        if val, ok := cache[x]; ok {
+            return val
+        }
+        result := fn(x)
+        cache[x] = result
+        return result
+    }
+}
+
+### Middleware et wrappers
+func timeFunction(fn func()) func() {
+    return func() {
+        start := time.Now()
+        fn()
+        fmt.Printf("Durée: %v\n", time.Since(start))
+    }
+}
+
+### 6.10.8 Bonnes pratiques avec les closures
+
+### Éviter les fuites mémoire
+- Attention aux références circulaires
+- Libérer les closures non utilisées
+
+### Limiter la portée des captures
+- Ne capturer que les variables nécessaires
+- Éviter de capturer de gros objets
+
+### Documentation claire
+- Documenter le comportement des closures
+- Expliquer l'état capturé et son cycle de vie
+
+### Tests appropriés
+- Tester l'indépendance des closures
+- Vérifier la persistance de l'état
+
+### 6.11 RÉCURSION EN GO
+
+### Qu'est-ce que la récursion ?
+La récursion est une technique où une fonction S'APPELLE ELLE-MÊME pour résoudre un problème en le décomposant en sous-problèmes plus petits.
+
+### 6.11.1 Structure d'une fonction récursive
+
+### Éléments obligatoires
+func recursive(parameter) returnType {
+    // CAS DE BASE (condition d'arrêt)
+    if baseCondition {
+        return baseValue
+    }
+    
+    // APPEL RÉCURSIF (avec paramètre modifié)
+    return operation(recursive(modifiedParameter))
+}
+
+### 6.11.2 Exemple : Factorielle
+
+### Implémentation récursive
+func fact(n int) int {
+    if n == 0 {           // CAS DE BASE
+        return 1
+    }
+    return n * fact(n-1)  // APPEL RÉCURSIF
+}
+
+### Exécution étape par étape pour fact(4)
+fact(4) → 4 * fact(3)
+        → 4 * (3 * fact(2))
+        → 4 * (3 * (2 * fact(1)))
+        → 4 * (3 * (2 * (1 * fact(0))))
+        → 4 * (3 * (2 * (1 * 1)))
+        → 4 * (3 * (2 * 1))
+        → 4 * (3 * 2)
+        → 4 * 6
+        → 24
+
+### 6.11.3 Fibonacci avec variables fonctions
+
+### Déclaration de variable fonction
+var fib func(n int) int             // Variable de type fonction
+
+### Assignation de fonction anonyme
+fib = func(n int) int {
+    if n < 2 {
+        return n                    // fib(0)=0, fib(1)=1
+    }
+    return fib(n-1) + fib(n-2)     // Récursion double
+}
+
+### Suite de Fibonacci
+fib(0) = 0
+fib(1) = 1
+fib(2) = 1
+fib(3) = 2
+fib(4) = 3
+fib(5) = 5
+fib(6) = 8
+fib(7) = 13
+
+### 6.11.4 Types de récursion
+
+### Récursion simple (factorielle)
+func fact(n int) int {
+    return n * fact(n-1)            // Un seul appel récursif
+}
+
+### Récursion double (Fibonacci)
+func fib(n int) int {
+    return fib(n-1) + fib(n-2)     // Deux appels récursifs
+}
+
+### Récursion terminale (optimisée)
+func factTail(n, acc int) int {
+    if n == 0 {
+        return acc
+    }
+    return factTail(n-1, n*acc)     // Appel terminal
+}
+
+### 6.11.5 Fonctions comme valeurs (première classe)
+
+### Déclaration de variable fonction
+var operation func(int, int) int
+
+### Assignation de fonction
+operation = func(a, b int) int { return a + b }
+result := operation(5, 3)           // 8
+
+### Réassignation
+operation = func(a, b int) int { return a * b }
+result = operation(5, 3)            // 15
+
+### Passage de fonctions en paramètre
+func apply(fn func(int) int, value int) int {
+    return fn(value)
+}
+
+square := func(x int) int { return x * x }
+result := apply(square, 5)          // 25
+
+### 6.11.6 Exemples pratiques de récursion
+
+### Puissance
+func power(base, exp int) int {
+    if exp == 0 {
+        return 1
+    }
+    return base * power(base, exp-1)
+}
+
+### Somme des entiers
+func sum(n int) int {
+    if n <= 0 {
+        return 0
+    }
+    return n + sum(n-1)
+}
+
+### Compter les chiffres
+func countDigits(n int) int {
+    if n < 10 {
+        return 1
+    }
+    return 1 + countDigits(n/10)
+}
+
+### Inversion de chaîne
+func reverse(s string) string {
+    if len(s) <= 1 {
+        return s
+    }
+    return reverse(s[1:]) + string(s[0])
+}
+
+### 6.11.7 Récursion vs Itération
+
+### Version récursive (Fibonacci)
+func fibRecursive(n int) int {
+    if n < 2 { return n }
+    return fibRecursive(n-1) + fibRecursive(n-2)
+}
+
+### Version itérative (plus efficace)
+func fibIterative(n int) int {
+    if n < 2 { return n }
+    a, b := 0, 1
+    for i := 2; i <= n; i++ {
+        a, b = b, a+b
+    }
+    return b
+}
+
+### 6.11.8 Optimisation : Mémoisation
+
+### Fibonacci avec cache
+func fibMemo() func(int) int {
+    cache := make(map[int]int)
+    
+    var fib func(int) int
+    fib = func(n int) int {
+        if n < 2 { return n }
+        if val, ok := cache[n]; ok {
+            return val              // Valeur en cache
+        }
+        result := fib(n-1) + fib(n-2)
+        cache[n] = result           // Mise en cache
+        return result
+    }
+    return fib
+}
+
+### Utilisation
+fibFunc := fibMemo()
+fmt.Println(fibFunc(40))            // Beaucoup plus rapide
+
+### 6.11.9 Problèmes de performance
+
+### Récursion simple : Complexité linéaire
+fact(n) : O(n) temps, O(n) espace
+
+### Récursion double : Complexité exponentielle
+fib(n) : O(2^n) temps - TRÈS LENT pour n > 30
+
+### Solutions d'optimisation
+- Mémoisation : Cache des résultats
+- Récursion terminale : Optimisation du compilateur
+- Version itérative : Évite la pile d'appels
+
+### 6.11.10 Bonnes pratiques
+
+### Toujours définir un cas de base
+func badRecursive(n int) int {
+    return n + badRecursive(n-1)    // ❌ Récursion infinie !
+}
+
+func goodRecursive(n int) int {
+    if n <= 0 { return 0 }          // ✅ Cas de base
+    return n + goodRecursive(n-1)
+}
+
+### Vérifier la progression
+- Chaque appel doit se rapprocher du cas de base
+- Éviter les paramètres qui ne changent pas
+
+### Considérer les alternatives
+- Récursion pour les problèmes naturellement récursifs
+- Itération pour les problèmes simples (performance)
+- Mémoisation pour éviter les recalculs
+
+### Limites de la pile
+- Go a une pile limitée (~1MB par défaut)
+- Récursion profonde peut causer stack overflow
+- Utiliser la récursion terminale ou l'itération si nécessaire
+
+### 6.11.11 Avantages et inconvénients
+
+### Avantages de la récursion
+- Code élégant et expressif
+- Naturelle pour certains problèmes (arbres, fractales)
+- Correspond aux définitions mathématiques
+- Facilite la preuve de correction
+
+### Inconvénients
+- Performance généralement plus lente
+- Utilisation importante de mémoire (pile)
+- Risque de débordement de pile
+- Plus difficile à déboguer
+
+### Quand utiliser la récursion ?
+- Problèmes avec structure récursive naturelle
+- Algorithmes de parcours d'arbres
+- Algorithmes de recherche (backtracking)
+- Problèmes mathématiques (combinatoire)
+- Quand la lisibilité prime sur la performance
+
 ## 7. STRUCTURE D'UN PROGRAMME GO
 
 ```go
