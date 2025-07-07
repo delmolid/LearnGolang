@@ -878,7 +878,906 @@ func Now() time.Time {
     return time.Now()
 }
 
-## 7. STRUCTURE D'UN PROGRAMME GO
+### 6.10 CLOSURES (FERMETURES) EN GO
+
+### Qu'est-ce qu'une closure ?
+Une closure est une fonction qui :
+- Est définie à l'intérieur d'une autre fonction
+- CAPTURE et mémorise les variables de son environnement
+- Peut accéder et modifier ces variables même après la fin de la fonction parente
+
+### 6.10.1 Exemple basique de closure
+
+### Générateur de séquence
+func intSeq() func() int {
+    i := 0                    // Variable capturée
+    return func() int {       // Fonction anonyme (closure)
+        i++                   // Accède à la variable 'i' capturée
+        return i
+    }
+}
+
+### Utilisation
+nextInt := intSeq()           // Crée une closure
+fmt.Println(nextInt())        // 1
+fmt.Println(nextInt())        // 2
+fmt.Println(nextInt())        // 3
+
+### 6.10.2 Indépendance des closures
+newInts := intSeq()           // Nouvelle closure indépendante
+fmt.Println(newInts())        // 1 (nouvelle variable i)
+fmt.Println(newInts())        // 2
+
+### 6.10.3 Closure avec paramètres
+
+### Multiplicateur configuré
+func makeMultiplier(factor int) func(int) int {
+    return func(x int) int {
+        return x * factor     // 'factor' est capturé
+    }
+}
+
+double := makeMultiplier(2)   // Closure avec factor=2
+triple := makeMultiplier(3)   // Closure avec factor=3
+fmt.Println(double(5))        // 10
+fmt.Println(triple(5))        // 15
+
+### 6.10.4 Accumulateur avec closure
+func makeAccumulator() func(int) int {
+    sum := 0                  // État persistant
+    return func(value int) int {
+        sum += value          // Modification de l'état
+        return sum
+    }
+}
+
+acc := makeAccumulator()
+fmt.Println(acc(1))           // 1
+fmt.Println(acc(2))           // 3
+fmt.Println(acc(3))           // 6
+
+### 6.10.5 Concepts clés des closures
+
+### Capture de variables
+- La closure "se souvient" des variables de son environnement
+- Les variables restent vivantes tant que la closure existe
+
+### État persistant
+- Chaque closure maintient son propre état
+- Les variables capturées conservent leurs valeurs entre les appels
+
+### Encapsulation
+- Les variables capturées ne sont accessibles que via la closure
+- Impossible d'accéder directement aux variables depuis l'extérieur
+
+### Indépendance
+- Chaque appel à la fonction génératrice crée une nouvelle closure
+- Chaque closure a ses propres variables capturées
+
+### 6.10.6 Avantages des closures
+
+### Encapsulation des données
+- Données privées et protégées
+- Seule la closure peut les modifier
+
+### Alternative aux variables globales
+- État persistant sans pollution globale
+- Chaque instance maintient son propre état
+
+### Flexibilité et réutilisabilité
+- Permet de créer des fonctions spécialisées
+- Pattern de programmation fonctionnelle
+
+### Code concis
+- Plus simple que les structures avec méthodes
+- Interface claire et intuitive
+
+### 6.10.7 Cas d'usage courants
+
+### Générateurs
+func makeRange(start, end int) func() (int, bool) {
+    current := start
+    return func() (int, bool) {
+        if current >= end {
+            return 0, false
+        }
+        val := current
+        current++
+        return val, true
+    }
+}
+
+### Configuration de fonctions
+func makeValidator(minLength int) func(string) bool {
+    return func(input string) bool {
+        return len(input) >= minLength
+    }
+}
+
+### Cache/Mémoisation
+func memoize(fn func(int) int) func(int) int {
+    cache := make(map[int]int)
+    return func(x int) int {
+        if val, ok := cache[x]; ok {
+            return val
+        }
+        result := fn(x)
+        cache[x] = result
+        return result
+    }
+}
+
+### Middleware et wrappers
+func timeFunction(fn func()) func() {
+    return func() {
+        start := time.Now()
+        fn()
+        fmt.Printf("Durée: %v\n", time.Since(start))
+    }
+}
+
+### 6.10.8 Bonnes pratiques avec les closures
+
+### Éviter les fuites mémoire
+- Attention aux références circulaires
+- Libérer les closures non utilisées
+
+### Limiter la portée des captures
+- Ne capturer que les variables nécessaires
+- Éviter de capturer de gros objets
+
+### Documentation claire
+- Documenter le comportement des closures
+- Expliquer l'état capturé et son cycle de vie
+
+### Tests appropriés
+- Tester l'indépendance des closures
+- Vérifier la persistance de l'état
+
+### 6.11 RÉCURSION EN GO
+
+### Qu'est-ce que la récursion ?
+La récursion est une technique où une fonction S'APPELLE ELLE-MÊME pour résoudre un problème en le décomposant en sous-problèmes plus petits.
+
+### 6.11.1 Structure d'une fonction récursive
+
+### Éléments obligatoires
+func recursive(parameter) returnType {
+    // CAS DE BASE (condition d'arrêt)
+    if baseCondition {
+        return baseValue
+    }
+    
+    // APPEL RÉCURSIF (avec paramètre modifié)
+    return operation(recursive(modifiedParameter))
+}
+
+### 6.11.2 Exemple : Factorielle
+
+### Implémentation récursive
+func fact(n int) int {
+    if n == 0 {           // CAS DE BASE
+        return 1
+    }
+    return n * fact(n-1)  // APPEL RÉCURSIF
+}
+
+### Exécution étape par étape pour fact(4)
+fact(4) → 4 * fact(3)
+        → 4 * (3 * fact(2))
+        → 4 * (3 * (2 * fact(1)))
+        → 4 * (3 * (2 * (1 * fact(0))))
+        → 4 * (3 * (2 * (1 * 1)))
+        → 4 * (3 * (2 * 1))
+        → 4 * (3 * 2)
+        → 4 * 6
+        → 24
+
+### 6.11.3 Fibonacci avec variables fonctions
+
+### Déclaration de variable fonction
+var fib func(n int) int             // Variable de type fonction
+
+### Assignation de fonction anonyme
+fib = func(n int) int {
+    if n < 2 {
+        return n                    // fib(0)=0, fib(1)=1
+    }
+    return fib(n-1) + fib(n-2)     // Récursion double
+}
+
+### Suite de Fibonacci
+fib(0) = 0
+fib(1) = 1
+fib(2) = 1
+fib(3) = 2
+fib(4) = 3
+fib(5) = 5
+fib(6) = 8
+fib(7) = 13
+
+### 6.11.4 Types de récursion
+
+### Récursion simple (factorielle)
+func fact(n int) int {
+    return n * fact(n-1)            // Un seul appel récursif
+}
+
+### Récursion double (Fibonacci)
+func fib(n int) int {
+    return fib(n-1) + fib(n-2)     // Deux appels récursifs
+}
+
+### Récursion terminale (optimisée)
+func factTail(n, acc int) int {
+    if n == 0 {
+        return acc
+    }
+    return factTail(n-1, n*acc)     // Appel terminal
+}
+
+### 6.11.5 Fonctions comme valeurs (première classe)
+
+### Déclaration de variable fonction
+var operation func(int, int) int
+
+### Assignation de fonction
+operation = func(a, b int) int { return a + b }
+result := operation(5, 3)           // 8
+
+### Réassignation
+operation = func(a, b int) int { return a * b }
+result = operation(5, 3)            // 15
+
+### Passage de fonctions en paramètre
+func apply(fn func(int) int, value int) int {
+    return fn(value)
+}
+
+square := func(x int) int { return x * x }
+result := apply(square, 5)          // 25
+
+### 6.11.6 Exemples pratiques de récursion
+
+### Puissance
+func power(base, exp int) int {
+    if exp == 0 {
+        return 1
+    }
+    return base * power(base, exp-1)
+}
+
+### Somme des entiers
+func sum(n int) int {
+    if n <= 0 {
+        return 0
+    }
+    return n + sum(n-1)
+}
+
+### Compter les chiffres
+func countDigits(n int) int {
+    if n < 10 {
+        return 1
+    }
+    return 1 + countDigits(n/10)
+}
+
+### Inversion de chaîne
+func reverse(s string) string {
+    if len(s) <= 1 {
+        return s
+    }
+    return reverse(s[1:]) + string(s[0])
+}
+
+### 6.11.7 Récursion vs Itération
+
+### Version récursive (Fibonacci)
+func fibRecursive(n int) int {
+    if n < 2 { return n }
+    return fibRecursive(n-1) + fibRecursive(n-2)
+}
+
+### Version itérative (plus efficace)
+func fibIterative(n int) int {
+    if n < 2 { return n }
+    a, b := 0, 1
+    for i := 2; i <= n; i++ {
+        a, b = b, a+b
+    }
+    return b
+}
+
+### 6.11.8 Optimisation : Mémoisation
+
+### Fibonacci avec cache
+func fibMemo() func(int) int {
+    cache := make(map[int]int)
+    
+    var fib func(int) int
+    fib = func(n int) int {
+        if n < 2 { return n }
+        if val, ok := cache[n]; ok {
+            return val              // Valeur en cache
+        }
+        result := fib(n-1) + fib(n-2)
+        cache[n] = result           // Mise en cache
+        return result
+    }
+    return fib
+}
+
+### Utilisation
+fibFunc := fibMemo()
+fmt.Println(fibFunc(40))            // Beaucoup plus rapide
+
+### 6.11.9 Problèmes de performance
+
+### Récursion simple : Complexité linéaire
+fact(n) : O(n) temps, O(n) espace
+
+### Récursion double : Complexité exponentielle
+fib(n) : O(2^n) temps - TRÈS LENT pour n > 30
+
+### Solutions d'optimisation
+- Mémoisation : Cache des résultats
+- Récursion terminale : Optimisation du compilateur
+- Version itérative : Évite la pile d'appels
+
+### 6.11.10 Bonnes pratiques
+
+### Toujours définir un cas de base
+func badRecursive(n int) int {
+    return n + badRecursive(n-1)    // ❌ Récursion infinie !
+}
+
+func goodRecursive(n int) int {
+    if n <= 0 { return 0 }          // ✅ Cas de base
+    return n + goodRecursive(n-1)
+}
+
+### Vérifier la progression
+- Chaque appel doit se rapprocher du cas de base
+- Éviter les paramètres qui ne changent pas
+
+### Considérer les alternatives
+- Récursion pour les problèmes naturellement récursifs
+- Itération pour les problèmes simples (performance)
+- Mémoisation pour éviter les recalculs
+
+### Limites de la pile
+- Go a une pile limitée (~1MB par défaut)
+- Récursion profonde peut causer stack overflow
+- Utiliser la récursion terminale ou l'itération si nécessaire
+
+### 6.11.11 Avantages et inconvénients
+
+### Avantages de la récursion
+- Code élégant et expressif
+- Naturelle pour certains problèmes (arbres, fractales)
+- Correspond aux définitions mathématiques
+- Facilite la preuve de correction
+
+### Inconvénients
+- Performance généralement plus lente
+- Utilisation importante de mémoire (pile)
+- Risque de débordement de pile
+- Plus difficile à déboguer
+
+### Quand utiliser la récursion ?
+- Problèmes avec structure récursive naturelle
+- Algorithmes de parcours d'arbres
+- Algorithmes de recherche (backtracking)
+- Problèmes mathématiques (combinatoire)
+- Quand la lisibilité prime sur la performance
+
+## 7. STRUCTURES (STRUCTS) EN GO
+
+### Qu'est-ce qu'une structure ?
+Une structure (`struct`) est un TYPE DE DONNÉES PERSONNALISÉ qui groupe plusieurs champs de différents types sous un même nom. C'est l'équivalent des classes dans d'autres langages, mais sans héritage.
+
+### 7.1 Définition d'une structure
+
+### Syntaxe de base
+type NomStructure struct {
+    champ1 type1
+    champ2 type2
+    champ3 type3
+}
+
+### Exemple concret
+type person struct {
+    name string
+    age  int
+}
+
+### Caractéristiques des structures
+- GROUPEMENT LOGIQUE : Organise les données liées
+- TYPE SÉCURISÉ : Chaque structure est un type distinct
+- COMPOSITION : Go favorise la composition à l'héritage
+- MÉMOIRE EFFICACE : Champs stockés de manière contiguë
+
+### 7.2 Création et initialisation
+
+### Initialisation par position
+p1 := person{"Alice", 25}           // Ordre des champs important
+
+### Initialisation avec noms de champs (recommandé)
+p2 := person{name: "Bob", age: 30}  // Ordre libre, plus explicite
+
+### Initialisation partielle
+p3 := person{name: "Charlie"}       // age = 0 (valeur zéro)
+
+### Déclaration puis assignation
+var p4 person
+p4.name = "Diana"
+p4.age = 28
+
+### 7.3 Accès aux champs - Notation pointée
+
+### Lecture des champs
+nom := p2.name                      // "Bob"
+age := p2.age                       // 30
+
+### Modification des champs
+p2.name = "Robert"                  // Modification du nom
+p2.age = 31                         // Modification de l'âge
+
+### Syntaxe p.champ
+- p : Variable contenant la structure
+- . : Opérateur d'accès aux champs
+- champ : Nom du champ à accéder
+
+### 7.4 Pointeurs vers structures
+
+### Création d'un pointeur
+p := person{name: "Eve", age: 35}
+sp := &p                            // sp pointe vers p
+
+### Accès via pointeur (déréférencement automatique)
+fmt.Println(sp.age)                 // Go simplifie automatiquement
+sp.age = 36                         // Modification via pointeur
+
+### Équivalence (mais Go préfère la première)
+sp.age = 36                         // Syntaxe simplifiée
+(*sp).age = 36                      // Syntaxe complète
+
+### 7.5 Fonctions constructeurs
+
+### Pattern de constructeur simple
+func newPerson(name string) *person {
+    p := person{name: name}
+    p.age = 42                      // Valeur par défaut
+    return &p                       // Retourne l'adresse
+}
+
+### Utilisation
+alice := newPerson("Alice")         // alice est de type *person
+
+### Avantages des constructeurs
+- INITIALISATION COHÉRENTE : Garantit la cohérence des données
+- LOGIQUE CENTRALISÉE : Un seul endroit pour la création
+- VALEURS PAR DÉFAUT : Définit des valeurs standard
+- VALIDATION : Peut inclure des vérifications
+
+### Constructeur avec validation
+func newValidPerson(name string, age int) (*person, error) {
+    if name == "" {
+        return nil, fmt.Errorf("nom requis")
+    }
+    if age < 0 {
+        return nil, fmt.Errorf("âge invalide")
+    }
+    return &person{name: name, age: age}, nil
+}
+
+### 7.6 Structures anonymes
+
+### Définition et utilisation immédiate
+dog := struct {
+    name   string
+    isGood bool
+}{
+    "Rex",
+    true,
+}
+
+### Cas d'usage
+- Données temporaires
+- Configuration spécifique
+- Tests unitaires
+- Pas de réutilisation nécessaire
+
+### 7.7 Valeurs zéro des structures
+
+### Valeurs par défaut selon le type
+type config struct {
+    host    string  // ""
+    port    int     // 0
+    enabled bool    // false
+    timeout *int    // nil
+}
+
+var cfg config                      // Tous les champs ont leur valeur zéro
+
+### 7.8 Comparaison de structures
+
+### Structures comparables
+type point struct {
+    x, y int
+}
+
+p1 := point{1, 2}
+p2 := point{1, 2}
+fmt.Println(p1 == p2)               // true (même valeurs)
+
+### Structures non comparables (avec slices, maps, fonctions)
+type container struct {
+    data []int                      // Slice : non comparable
+}
+
+### 7.9 Composition de structures
+
+### Embedding (composition)
+type address struct {
+    street string
+    city   string
+}
+
+type employee struct {
+    name    string
+    age     int
+    address address                 // Composition
+}
+
+### Utilisation
+emp := employee{
+    name: "John",
+    age:  30,
+    address: address{
+        street: "123 Main St",
+        city:   "Paris",
+    },
+}
+fmt.Println(emp.address.city)       // "Paris"
+
+### 7.10 Méthodes sur structures (aperçu)
+
+### Définition d'une méthode
+func (p person) sePresenter() {
+    fmt.Printf("Je suis %s, %d ans\n", p.name, p.age)
+}
+
+### Utilisation
+alice := person{name: "Alice", age: 25}
+alice.sePresenter()                 // "Je suis Alice, 25 ans"
+
+## 7.14 MÉTHODES EN GO - CONCEPTS AVANCÉS
+
+### Qu'est-ce qu'une méthode ?
+Une MÉTHODE est une fonction attachée à un type spécifique. Elle permet d'associer des comportements aux structures, créant ainsi une approche orientée objet en Go.
+
+### 7.14.1 Syntaxe des méthodes
+
+### Anatomie d'une méthode
+func (receiver type) nomMethode(paramètres) typeRetour {
+    // corps de la méthode
+}
+
+### Exemple concret
+type rect struct {
+    width, height int
+}
+
+func (r rect) area() int {
+    return r.width * r.height
+}
+
+### Éléments clés
+- RECEIVER : (r rect) - la structure qui "reçoit" la méthode
+- ACCÈS AUX CHAMPS : r.width, r.height via le receiver
+- SYNTAXE D'APPEL : rectangle.area()
+
+### 7.14.2 Le receiver (récepteur)
+
+### Receiver par valeur
+func (r rect) area() int {           // r est une COPIE
+    return r.width * r.height        // Lecture seulement
+}
+
+### Receiver par pointeur
+func (r *rect) doubleSize() {        // r est un POINTEUR
+    r.width *= 2                     // Modification de l'original
+    r.height *= 2
+}
+
+### Conventions de nommage
+- Utilisez la première lettre du type : (r rect), (u user)
+- Évitez "this", "self" ou des noms longs
+- Soyez cohérent dans tout le code
+
+### 7.14.3 Quand utiliser valeur vs pointeur
+
+### Receiver par valeur - Utilisez quand :
+- Lecture seulement des champs
+- Structure petite (quelques champs simples)
+- Pas de modification nécessaire
+- Types de base (int, string, bool)
+
+### Receiver par pointeur - Utilisez quand :
+- Modification des champs nécessaire
+- Structure volumineuse (éviter la copie)
+- Cohérence avec d'autres méthodes
+- Performance critique
+
+### 7.14.4 Exemples pratiques de méthodes
+
+### Méthodes de calcul
+func (r rect) area() int {
+    return r.width * r.height
+}
+
+func (r rect) perimeter() int {
+    return 2*r.width + 2*r.height
+}
+
+func (r rect) isSquare() bool {
+    return r.width == r.height
+}
+
+### Méthodes de modification
+func (r *rect) resize(factor float64) {
+    r.width = int(float64(r.width) * factor)
+    r.height = int(float64(r.height) * factor)
+}
+
+func (r *rect) setDimensions(width, height int) {
+    r.width = width
+    r.height = height
+}
+
+### Méthodes de validation
+func (r rect) isValid() bool {
+    return r.width > 0 && r.height > 0
+}
+
+func (r rect) hasValidRatio() bool {
+    if r.height == 0 {
+        return false
+    }
+    ratio := float64(r.width) / float64(r.height)
+    return ratio >= 0.1 && ratio <= 10.0
+}
+
+### 7.14.5 Appel de méthodes
+
+### Sur valeur directe
+r := rect{width: 10, height: 5}
+fmt.Println(r.area())                // 50
+fmt.Println(r.perimeter())           // 30
+
+### Sur pointeur (déréférencement automatique)
+rp := &rect{width: 10, height: 5}
+fmt.Println(rp.area())               // 50 - Go fait rp.area() → (*rp).area()
+rp.resize(2.0)                       // Modification via pointeur
+
+### Conversion automatique de Go
+r := rect{width: 10, height: 5}
+r.resize(2.0)                        // Go fait (&r).resize(2.0) automatiquement
+
+### 7.14.6 Méthodes vs Fonctions
+
+### Approche avec fonctions
+func area(r rect) int {
+    return r.width * r.height
+}
+func perimeter(r rect) int {
+    return 2*r.width + 2*r.height
+}
+// Utilisation : area(rectangle), perimeter(rectangle)
+
+### Approche avec méthodes (préférée)
+func (r rect) area() int { ... }
+func (r rect) perimeter() int { ... }
+// Utilisation : rectangle.area(), rectangle.perimeter()
+
+### Avantages des méthodes
+- LISIBILITÉ : Plus naturel et expressif
+- ORGANISATION : Comportements liés aux données
+- ENCAPSULATION : Logique attachée au type
+- INTERFACES : Base pour le polymorphisme
+
+### 7.14.7 Méthodes spéciales
+
+### Méthode String() - Affichage personnalisé
+func (r rect) String() string {
+    return fmt.Sprintf("Rectangle(%dx%d)", r.width, r.height)
+}
+
+// Go appelle automatiquement String() dans fmt.Println
+r := rect{width: 10, height: 5}
+fmt.Println(r)                       // Rectangle(10x5)
+
+### Méthodes de comparaison
+func (r rect) equals(other rect) bool {
+    return r.width == other.width && r.height == other.height
+}
+
+func (r rect) isLargerThan(other rect) bool {
+    return r.area() > other.area()
+}
+
+### 7.14.8 Chaînage de méthodes
+
+### Méthodes qui retournent le receiver
+func (r *rect) setWidth(width int) *rect {
+    r.width = width
+    return r
+}
+
+func (r *rect) setHeight(height int) *rect {
+    r.height = height
+    return r
+}
+
+### Utilisation en chaîne
+r := &rect{}
+r.setWidth(10).setHeight(5)
+fmt.Println(r.area())                // 50
+
+### 7.14.9 Méthodes et interfaces
+
+### Interface définie par les méthodes
+type Shape interface {
+    area() int
+    perimeter() int
+}
+
+// rect implémente automatiquement Shape
+var s Shape = rect{width: 10, height: 5}
+fmt.Println(s.area())                // 50
+
+### Polymorphisme avec interfaces
+shapes := []Shape{
+    rect{width: 10, height: 5},
+    circle{radius: 7},
+}
+
+for _, shape := range shapes {
+    fmt.Println("Area:", shape.area())
+}
+
+### 7.14.10 Exemples concrets d'utilisation
+
+### Utilisation basique
+r := rect{width: 10, height: 5}
+fmt.Println("Area:", r.area())       // Area: 50
+fmt.Println("Perimeter:", r.perimeter()) // Perimeter: 30
+fmt.Println("Is square:", r.isSquare())  // Is square: false
+
+### Avec pointeur pour modification
+rp := &rect{width: 10, height: 5}
+rp.resize(2.0)                       // Doubler la taille
+fmt.Println("New area:", rp.area())  // New area: 200
+
+### Validation et conditions
+if r.isValid() && !r.isSquare() {
+    fmt.Println("Rectangle valide non carré")
+}
+
+### 7.14.11 Sortie du programme methods.go
+rect{width: 10, height: 5}          // Affichage de la structure
+area 50                              // 10 * 5
+perim 30                             // 2 * (10 + 5)
+area: 50                             // Via pointeur (même résultat)
+perim: 30                            // Via pointeur (même résultat)
+
+### 7.14.12 Bonnes pratiques avec les méthodes
+
+### Conception
+- Une méthode = une responsabilité claire
+- Noms descriptifs et cohérents
+- Groupez les méthodes logiquement liées
+
+### Performance
+- Receiver par valeur pour lecture
+- Receiver par pointeur pour modification
+- Évitez les copies inutiles de grandes structures
+
+### Cohérence
+- Soyez cohérent dans le choix valeur/pointeur
+- Utilisez les mêmes conventions de nommage
+- Documentez les méthodes complexes
+
+### Validation
+- Validez les paramètres dans les méthodes
+- Gérez les cas d'erreur appropriés
+- Retournez des erreurs explicites si nécessaire
+
+### 7.11 Exemples pratiques
+
+### Exemple 1 : Gestion d'utilisateurs
+type user struct {
+    id       int
+    username string
+    email    string
+    active   bool
+}
+
+func newUser(username, email string) *user {
+    return &user{
+        id:       generateID(),
+        username: username,
+        email:    email,
+        active:   true,
+    }
+}
+
+### Exemple 2 : Configuration
+type config struct {
+    host     string
+    port     int
+    database string
+    timeout  int
+}
+
+func defaultConfig() config {
+    return config{
+        host:     "localhost",
+        port:     8080,
+        database: "myapp",
+        timeout:  30,
+    }
+}
+
+### Exemple 3 : Coordonnées
+type point struct {
+    x, y float64
+}
+
+func (p point) distance(other point) float64 {
+    dx := p.x - other.x
+    dy := p.y - other.y
+    return math.Sqrt(dx*dx + dy*dy)
+}
+
+### 7.12 Sécurité mémoire avec Go
+
+### Retour de pointeur sécurisé
+func createPerson() *person {
+    p := person{name: "Local", age: 20}
+    return &p                       // ✅ Sécurisé en Go !
+}
+
+### Gestion automatique par Go
+- ANALYSE D'ÉCHAPPEMENT : Go détecte si p est retournée
+- ALLOCATION HEAP : p est allouée sur le tas automatiquement
+- GARBAGE COLLECTION : Libération automatique quand inutilisée
+
+### 7.13 Bonnes pratiques avec les structures
+
+### Nommage
+- Utilisez CamelCase pour les noms de structures
+- Première lettre majuscule pour export public
+- Première lettre minuscule pour usage interne
+
+### Initialisation
+- Préférez l'initialisation avec noms de champs
+- Utilisez des constructeurs pour la logique complexe
+- Validez les données dans les constructeurs
+
+### Conception
+- Gardez les structures simples et cohérentes
+- Utilisez la composition plutôt que l'héritage
+- Groupez les données logiquement liées
+
+### Performance
+- Retournez des pointeurs pour les grandes structures
+- Évitez la copie inutile de structures volumineuses
+- Utilisez l'embedding pour éviter l'indirection
+
+## 8. STRUCTURE D'UN PROGRAMME GO
 
 ```go
 package main           // Déclaration du package
@@ -889,7 +1788,7 @@ func main() {         // Fonction principale
 }
 ```
 
-## 8. BONNES PRATIQUES
+## 9. BONNES PRATIQUES
 
 - Utilisez := pour les nouvelles variables dans les fonctions
 - Utilisez var pour les variables au niveau package
@@ -923,8 +1822,22 @@ func main() {         // Fonction principale
 - fmt.Println() pour l'affichage simple
 - fmt.Printf() pour l'affichage formaté
 - Commentez votre code avec //
+- Définissez des structures pour grouper les données liées
+- Utilisez des constructeurs pour initialiser les structures de manière cohérente
+- Préférez l'initialisation avec noms de champs pour la clarté
+- Retournez des pointeurs pour les structures volumineuses
+- Utilisez la notation pointée (p.champ) pour accéder aux champs
+- Validez les données dans les fonctions constructeurs
+- Utilisez la composition plutôt que l'héritage avec les structures
+- Nommez les structures en CamelCase (majuscule pour export public)
+- Attachez des méthodes aux structures pour les comportements
+- Utilisez receiver par valeur pour la lecture, par pointeur pour la modification
+- Nommez les receivers avec la première lettre du type (r pour rect)
+- Préférez les méthodes aux fonctions pour l'organisation du code
+- Implémentez String() pour un affichage personnalisé des structures
+- Utilisez le chaînage de méthodes pour une syntaxe fluide
 
-## 9. RESSOURCES D'APPRENTISSAGE
+## 10. RESSOURCES D'APPRENTISSAGE
 
 ### Officielles
 - Tour of Go: https://go.dev/tour/
