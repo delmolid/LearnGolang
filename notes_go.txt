@@ -1272,7 +1272,512 @@ func goodRecursive(n int) int {
 - Problèmes mathématiques (combinatoire)
 - Quand la lisibilité prime sur la performance
 
-## 7. STRUCTURE D'UN PROGRAMME GO
+## 7. STRUCTURES (STRUCTS) EN GO
+
+### Qu'est-ce qu'une structure ?
+Une structure (`struct`) est un TYPE DE DONNÉES PERSONNALISÉ qui groupe plusieurs champs de différents types sous un même nom. C'est l'équivalent des classes dans d'autres langages, mais sans héritage.
+
+### 7.1 Définition d'une structure
+
+### Syntaxe de base
+type NomStructure struct {
+    champ1 type1
+    champ2 type2
+    champ3 type3
+}
+
+### Exemple concret
+type person struct {
+    name string
+    age  int
+}
+
+### Caractéristiques des structures
+- GROUPEMENT LOGIQUE : Organise les données liées
+- TYPE SÉCURISÉ : Chaque structure est un type distinct
+- COMPOSITION : Go favorise la composition à l'héritage
+- MÉMOIRE EFFICACE : Champs stockés de manière contiguë
+
+### 7.2 Création et initialisation
+
+### Initialisation par position
+p1 := person{"Alice", 25}           // Ordre des champs important
+
+### Initialisation avec noms de champs (recommandé)
+p2 := person{name: "Bob", age: 30}  // Ordre libre, plus explicite
+
+### Initialisation partielle
+p3 := person{name: "Charlie"}       // age = 0 (valeur zéro)
+
+### Déclaration puis assignation
+var p4 person
+p4.name = "Diana"
+p4.age = 28
+
+### 7.3 Accès aux champs - Notation pointée
+
+### Lecture des champs
+nom := p2.name                      // "Bob"
+age := p2.age                       // 30
+
+### Modification des champs
+p2.name = "Robert"                  // Modification du nom
+p2.age = 31                         // Modification de l'âge
+
+### Syntaxe p.champ
+- p : Variable contenant la structure
+- . : Opérateur d'accès aux champs
+- champ : Nom du champ à accéder
+
+### 7.4 Pointeurs vers structures
+
+### Création d'un pointeur
+p := person{name: "Eve", age: 35}
+sp := &p                            // sp pointe vers p
+
+### Accès via pointeur (déréférencement automatique)
+fmt.Println(sp.age)                 // Go simplifie automatiquement
+sp.age = 36                         // Modification via pointeur
+
+### Équivalence (mais Go préfère la première)
+sp.age = 36                         // Syntaxe simplifiée
+(*sp).age = 36                      // Syntaxe complète
+
+### 7.5 Fonctions constructeurs
+
+### Pattern de constructeur simple
+func newPerson(name string) *person {
+    p := person{name: name}
+    p.age = 42                      // Valeur par défaut
+    return &p                       // Retourne l'adresse
+}
+
+### Utilisation
+alice := newPerson("Alice")         // alice est de type *person
+
+### Avantages des constructeurs
+- INITIALISATION COHÉRENTE : Garantit la cohérence des données
+- LOGIQUE CENTRALISÉE : Un seul endroit pour la création
+- VALEURS PAR DÉFAUT : Définit des valeurs standard
+- VALIDATION : Peut inclure des vérifications
+
+### Constructeur avec validation
+func newValidPerson(name string, age int) (*person, error) {
+    if name == "" {
+        return nil, fmt.Errorf("nom requis")
+    }
+    if age < 0 {
+        return nil, fmt.Errorf("âge invalide")
+    }
+    return &person{name: name, age: age}, nil
+}
+
+### 7.6 Structures anonymes
+
+### Définition et utilisation immédiate
+dog := struct {
+    name   string
+    isGood bool
+}{
+    "Rex",
+    true,
+}
+
+### Cas d'usage
+- Données temporaires
+- Configuration spécifique
+- Tests unitaires
+- Pas de réutilisation nécessaire
+
+### 7.7 Valeurs zéro des structures
+
+### Valeurs par défaut selon le type
+type config struct {
+    host    string  // ""
+    port    int     // 0
+    enabled bool    // false
+    timeout *int    // nil
+}
+
+var cfg config                      // Tous les champs ont leur valeur zéro
+
+### 7.8 Comparaison de structures
+
+### Structures comparables
+type point struct {
+    x, y int
+}
+
+p1 := point{1, 2}
+p2 := point{1, 2}
+fmt.Println(p1 == p2)               // true (même valeurs)
+
+### Structures non comparables (avec slices, maps, fonctions)
+type container struct {
+    data []int                      // Slice : non comparable
+}
+
+### 7.9 Composition de structures
+
+### Embedding (composition)
+type address struct {
+    street string
+    city   string
+}
+
+type employee struct {
+    name    string
+    age     int
+    address address                 // Composition
+}
+
+### Utilisation
+emp := employee{
+    name: "John",
+    age:  30,
+    address: address{
+        street: "123 Main St",
+        city:   "Paris",
+    },
+}
+fmt.Println(emp.address.city)       // "Paris"
+
+### 7.10 Méthodes sur structures (aperçu)
+
+### Définition d'une méthode
+func (p person) sePresenter() {
+    fmt.Printf("Je suis %s, %d ans\n", p.name, p.age)
+}
+
+### Utilisation
+alice := person{name: "Alice", age: 25}
+alice.sePresenter()                 // "Je suis Alice, 25 ans"
+
+## 7.14 MÉTHODES EN GO - CONCEPTS AVANCÉS
+
+### Qu'est-ce qu'une méthode ?
+Une MÉTHODE est une fonction attachée à un type spécifique. Elle permet d'associer des comportements aux structures, créant ainsi une approche orientée objet en Go.
+
+### 7.14.1 Syntaxe des méthodes
+
+### Anatomie d'une méthode
+func (receiver type) nomMethode(paramètres) typeRetour {
+    // corps de la méthode
+}
+
+### Exemple concret
+type rect struct {
+    width, height int
+}
+
+func (r rect) area() int {
+    return r.width * r.height
+}
+
+### Éléments clés
+- RECEIVER : (r rect) - la structure qui "reçoit" la méthode
+- ACCÈS AUX CHAMPS : r.width, r.height via le receiver
+- SYNTAXE D'APPEL : rectangle.area()
+
+### 7.14.2 Le receiver (récepteur)
+
+### Receiver par valeur
+func (r rect) area() int {           // r est une COPIE
+    return r.width * r.height        // Lecture seulement
+}
+
+### Receiver par pointeur
+func (r *rect) doubleSize() {        // r est un POINTEUR
+    r.width *= 2                     // Modification de l'original
+    r.height *= 2
+}
+
+### Conventions de nommage
+- Utilisez la première lettre du type : (r rect), (u user)
+- Évitez "this", "self" ou des noms longs
+- Soyez cohérent dans tout le code
+
+### 7.14.3 Quand utiliser valeur vs pointeur
+
+### Receiver par valeur - Utilisez quand :
+- Lecture seulement des champs
+- Structure petite (quelques champs simples)
+- Pas de modification nécessaire
+- Types de base (int, string, bool)
+
+### Receiver par pointeur - Utilisez quand :
+- Modification des champs nécessaire
+- Structure volumineuse (éviter la copie)
+- Cohérence avec d'autres méthodes
+- Performance critique
+
+### 7.14.4 Exemples pratiques de méthodes
+
+### Méthodes de calcul
+func (r rect) area() int {
+    return r.width * r.height
+}
+
+func (r rect) perimeter() int {
+    return 2*r.width + 2*r.height
+}
+
+func (r rect) isSquare() bool {
+    return r.width == r.height
+}
+
+### Méthodes de modification
+func (r *rect) resize(factor float64) {
+    r.width = int(float64(r.width) * factor)
+    r.height = int(float64(r.height) * factor)
+}
+
+func (r *rect) setDimensions(width, height int) {
+    r.width = width
+    r.height = height
+}
+
+### Méthodes de validation
+func (r rect) isValid() bool {
+    return r.width > 0 && r.height > 0
+}
+
+func (r rect) hasValidRatio() bool {
+    if r.height == 0 {
+        return false
+    }
+    ratio := float64(r.width) / float64(r.height)
+    return ratio >= 0.1 && ratio <= 10.0
+}
+
+### 7.14.5 Appel de méthodes
+
+### Sur valeur directe
+r := rect{width: 10, height: 5}
+fmt.Println(r.area())                // 50
+fmt.Println(r.perimeter())           // 30
+
+### Sur pointeur (déréférencement automatique)
+rp := &rect{width: 10, height: 5}
+fmt.Println(rp.area())               // 50 - Go fait rp.area() → (*rp).area()
+rp.resize(2.0)                       // Modification via pointeur
+
+### Conversion automatique de Go
+r := rect{width: 10, height: 5}
+r.resize(2.0)                        // Go fait (&r).resize(2.0) automatiquement
+
+### 7.14.6 Méthodes vs Fonctions
+
+### Approche avec fonctions
+func area(r rect) int {
+    return r.width * r.height
+}
+func perimeter(r rect) int {
+    return 2*r.width + 2*r.height
+}
+// Utilisation : area(rectangle), perimeter(rectangle)
+
+### Approche avec méthodes (préférée)
+func (r rect) area() int { ... }
+func (r rect) perimeter() int { ... }
+// Utilisation : rectangle.area(), rectangle.perimeter()
+
+### Avantages des méthodes
+- LISIBILITÉ : Plus naturel et expressif
+- ORGANISATION : Comportements liés aux données
+- ENCAPSULATION : Logique attachée au type
+- INTERFACES : Base pour le polymorphisme
+
+### 7.14.7 Méthodes spéciales
+
+### Méthode String() - Affichage personnalisé
+func (r rect) String() string {
+    return fmt.Sprintf("Rectangle(%dx%d)", r.width, r.height)
+}
+
+// Go appelle automatiquement String() dans fmt.Println
+r := rect{width: 10, height: 5}
+fmt.Println(r)                       // Rectangle(10x5)
+
+### Méthodes de comparaison
+func (r rect) equals(other rect) bool {
+    return r.width == other.width && r.height == other.height
+}
+
+func (r rect) isLargerThan(other rect) bool {
+    return r.area() > other.area()
+}
+
+### 7.14.8 Chaînage de méthodes
+
+### Méthodes qui retournent le receiver
+func (r *rect) setWidth(width int) *rect {
+    r.width = width
+    return r
+}
+
+func (r *rect) setHeight(height int) *rect {
+    r.height = height
+    return r
+}
+
+### Utilisation en chaîne
+r := &rect{}
+r.setWidth(10).setHeight(5)
+fmt.Println(r.area())                // 50
+
+### 7.14.9 Méthodes et interfaces
+
+### Interface définie par les méthodes
+type Shape interface {
+    area() int
+    perimeter() int
+}
+
+// rect implémente automatiquement Shape
+var s Shape = rect{width: 10, height: 5}
+fmt.Println(s.area())                // 50
+
+### Polymorphisme avec interfaces
+shapes := []Shape{
+    rect{width: 10, height: 5},
+    circle{radius: 7},
+}
+
+for _, shape := range shapes {
+    fmt.Println("Area:", shape.area())
+}
+
+### 7.14.10 Exemples concrets d'utilisation
+
+### Utilisation basique
+r := rect{width: 10, height: 5}
+fmt.Println("Area:", r.area())       // Area: 50
+fmt.Println("Perimeter:", r.perimeter()) // Perimeter: 30
+fmt.Println("Is square:", r.isSquare())  // Is square: false
+
+### Avec pointeur pour modification
+rp := &rect{width: 10, height: 5}
+rp.resize(2.0)                       // Doubler la taille
+fmt.Println("New area:", rp.area())  // New area: 200
+
+### Validation et conditions
+if r.isValid() && !r.isSquare() {
+    fmt.Println("Rectangle valide non carré")
+}
+
+### 7.14.11 Sortie du programme methods.go
+rect{width: 10, height: 5}          // Affichage de la structure
+area 50                              // 10 * 5
+perim 30                             // 2 * (10 + 5)
+area: 50                             // Via pointeur (même résultat)
+perim: 30                            // Via pointeur (même résultat)
+
+### 7.14.12 Bonnes pratiques avec les méthodes
+
+### Conception
+- Une méthode = une responsabilité claire
+- Noms descriptifs et cohérents
+- Groupez les méthodes logiquement liées
+
+### Performance
+- Receiver par valeur pour lecture
+- Receiver par pointeur pour modification
+- Évitez les copies inutiles de grandes structures
+
+### Cohérence
+- Soyez cohérent dans le choix valeur/pointeur
+- Utilisez les mêmes conventions de nommage
+- Documentez les méthodes complexes
+
+### Validation
+- Validez les paramètres dans les méthodes
+- Gérez les cas d'erreur appropriés
+- Retournez des erreurs explicites si nécessaire
+
+### 7.11 Exemples pratiques
+
+### Exemple 1 : Gestion d'utilisateurs
+type user struct {
+    id       int
+    username string
+    email    string
+    active   bool
+}
+
+func newUser(username, email string) *user {
+    return &user{
+        id:       generateID(),
+        username: username,
+        email:    email,
+        active:   true,
+    }
+}
+
+### Exemple 2 : Configuration
+type config struct {
+    host     string
+    port     int
+    database string
+    timeout  int
+}
+
+func defaultConfig() config {
+    return config{
+        host:     "localhost",
+        port:     8080,
+        database: "myapp",
+        timeout:  30,
+    }
+}
+
+### Exemple 3 : Coordonnées
+type point struct {
+    x, y float64
+}
+
+func (p point) distance(other point) float64 {
+    dx := p.x - other.x
+    dy := p.y - other.y
+    return math.Sqrt(dx*dx + dy*dy)
+}
+
+### 7.12 Sécurité mémoire avec Go
+
+### Retour de pointeur sécurisé
+func createPerson() *person {
+    p := person{name: "Local", age: 20}
+    return &p                       // ✅ Sécurisé en Go !
+}
+
+### Gestion automatique par Go
+- ANALYSE D'ÉCHAPPEMENT : Go détecte si p est retournée
+- ALLOCATION HEAP : p est allouée sur le tas automatiquement
+- GARBAGE COLLECTION : Libération automatique quand inutilisée
+
+### 7.13 Bonnes pratiques avec les structures
+
+### Nommage
+- Utilisez CamelCase pour les noms de structures
+- Première lettre majuscule pour export public
+- Première lettre minuscule pour usage interne
+
+### Initialisation
+- Préférez l'initialisation avec noms de champs
+- Utilisez des constructeurs pour la logique complexe
+- Validez les données dans les constructeurs
+
+### Conception
+- Gardez les structures simples et cohérentes
+- Utilisez la composition plutôt que l'héritage
+- Groupez les données logiquement liées
+
+### Performance
+- Retournez des pointeurs pour les grandes structures
+- Évitez la copie inutile de structures volumineuses
+- Utilisez l'embedding pour éviter l'indirection
+
+## 8. STRUCTURE D'UN PROGRAMME GO
 
 ```go
 package main           // Déclaration du package
@@ -1283,7 +1788,7 @@ func main() {         // Fonction principale
 }
 ```
 
-## 8. BONNES PRATIQUES
+## 9. BONNES PRATIQUES
 
 - Utilisez := pour les nouvelles variables dans les fonctions
 - Utilisez var pour les variables au niveau package
@@ -1317,8 +1822,22 @@ func main() {         // Fonction principale
 - fmt.Println() pour l'affichage simple
 - fmt.Printf() pour l'affichage formaté
 - Commentez votre code avec //
+- Définissez des structures pour grouper les données liées
+- Utilisez des constructeurs pour initialiser les structures de manière cohérente
+- Préférez l'initialisation avec noms de champs pour la clarté
+- Retournez des pointeurs pour les structures volumineuses
+- Utilisez la notation pointée (p.champ) pour accéder aux champs
+- Validez les données dans les fonctions constructeurs
+- Utilisez la composition plutôt que l'héritage avec les structures
+- Nommez les structures en CamelCase (majuscule pour export public)
+- Attachez des méthodes aux structures pour les comportements
+- Utilisez receiver par valeur pour la lecture, par pointeur pour la modification
+- Nommez les receivers avec la première lettre du type (r pour rect)
+- Préférez les méthodes aux fonctions pour l'organisation du code
+- Implémentez String() pour un affichage personnalisé des structures
+- Utilisez le chaînage de méthodes pour une syntaxe fluide
 
-## 9. RESSOURCES D'APPRENTISSAGE
+## 10. RESSOURCES D'APPRENTISSAGE
 
 ### Officielles
 - Tour of Go: https://go.dev/tour/
