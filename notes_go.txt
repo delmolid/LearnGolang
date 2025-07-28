@@ -1695,6 +1695,312 @@ perim: 30                            // Via pointeur (même résultat)
 - Gérez les cas d'erreur appropriés
 - Retournez des erreurs explicites si nécessaire
 
+## 7.15 INTERFACES EN GO - POLYMORPHISME ET CONTRATS
+
+### Qu'est-ce qu'une interface ?
+Une INTERFACE en Go définit un CONTRAT - un ensemble de méthodes qu'un type doit implémenter. C'est le mécanisme de polymorphisme de Go qui permet d'écrire du code flexible et réutilisable.
+
+### 7.15.1 Définition d'une interface
+
+### Syntaxe générale
+type nomInterface interface {
+    methode1() typeRetour1
+    methode2(paramètres) typeRetour2
+    methode3()
+}
+
+### Exemple concret
+type geometry interface {
+    area() float64
+    perim() float64
+}
+
+### Caractéristiques des interfaces
+- CONTRAT : Définit "QUOI" faire, pas "COMMENT"
+- IMPLICITE : Pas besoin de déclarer "implements"
+- POLYMORPHISME : Même interface, comportements différents
+- COMPOSITION : Peut inclure d'autres interfaces
+
+### 7.15.2 Implémentation implicite
+
+### Structure rect implémentant geometry
+type rect struct {
+    width, height float64
+}
+
+func (r rect) area() float64 {
+    return r.width * r.height
+}
+
+func (r rect) perim() float64 {
+    return 2*r.width + 2*r.height
+}
+
+### Structure circle implémentant geometry
+type circle struct {
+    radius float64
+}
+
+func (c circle) area() float64 {
+    return math.Pi * c.radius * c.radius
+}
+
+func (c circle) perim() float64 {
+    return 2 * math.Pi * c.radius
+}
+
+### Point clé
+- AUTOMATIQUE : rect et circle implémentent geometry automatiquement
+- CRITÈRE : Avoir toutes les méthodes requises par l'interface
+- VÉRIFICATION : Faite à la compilation
+
+### 7.15.3 Polymorphisme en action
+
+### Fonction polymorphe
+func measure(g geometry) {
+    fmt.Println(g)           // Affiche la structure
+    fmt.Println(g.area())    // Appelle area() du type concret
+    fmt.Println(g.perim())   // Appelle perim() du type concret
+}
+
+### Utilisation avec différents types
+r := rect{width: 3, height: 4}
+c := circle{radius: 5}
+
+measure(r)  // Fonctionne avec rect
+measure(c)  // Fonctionne avec circle
+
+### Avantage
+- MÊME FONCTION : measure() fonctionne avec tous les types geometry
+- FLEXIBILITÉ : Ajouter de nouveaux types sans modifier measure()
+- DÉCOUPLAGE : Code indépendant des implémentations concrètes
+
+### 7.15.4 Type Assertion - Récupération du type concret
+
+### Syntaxe de base
+valeur, ok := interface.(TypeConcret)
+
+### Exemple pratique
+func detectCircle(g geometry) {
+    if c, ok := g.(circle); ok {
+        fmt.Println("circle with radius", c.radius)
+    }
+}
+
+### Décomposition
+- g.(circle) : Tente de convertir g en circle
+- c : Variable recevant le circle si conversion réussie
+- ok : Booléen indiquant le succès de la conversion
+- if c, ok := ... : Pattern sécurisé pour vérifier le type
+
+### Utilisation
+detectCircle(r)  // r est rect → rien ne s'affiche
+detectCircle(c)  // c est circle → "circle with radius 5"
+
+### 7.15.5 Type Switch - Gestion de plusieurs types
+
+### Syntaxe du type switch
+func classifyShape(g geometry) {
+    switch s := g.(type) {
+    case rect:
+        fmt.Printf("Rectangle %.1fx%.1f\n", s.width, s.height)
+    case circle:
+        fmt.Printf("Circle radius %.1f\n", s.radius)
+    default:
+        fmt.Println("Unknown shape")
+    }
+}
+
+### Avantages
+- MULTIPLE TYPES : Gère plusieurs types en une fois
+- VARIABLE TYPÉE : s est du bon type dans chaque case
+- SÉCURISÉ : default gère les types non prévus
+
+### 7.15.6 Interface vide et type any
+
+### Interface vide (accepte tout)
+func printAnything(v interface{}) {
+    fmt.Println(v)
+}
+
+### Go 1.18+ : type any
+func printAnything(v any) {  // any = interface{}
+    fmt.Println(v)
+}
+
+### Utilisation
+printAnything(42)        // int
+printAnything("hello")   // string
+printAnything(rect{})    // struct
+
+### 7.15.7 Composition d'interfaces
+
+### Interfaces simples
+type Reader interface {
+    Read([]byte) (int, error)
+}
+
+type Writer interface {
+    Write([]byte) (int, error)
+}
+
+### Interface composée
+type ReadWriter interface {
+    Reader    // Inclusion d'interface
+    Writer    // Composition
+}
+
+### Avantage
+- RÉUTILISATION : Combine des interfaces existantes
+- MODULARITÉ : Petites interfaces composables
+- FLEXIBILITÉ : Types peuvent implémenter partiellement
+
+### 7.15.8 Interfaces dans la bibliothèque standard
+
+### fmt.Stringer - Affichage personnalisé
+type Stringer interface {
+    String() string
+}
+
+func (r rect) String() string {
+    return fmt.Sprintf("Rectangle(%.1fx%.1f)", r.width, r.height)
+}
+// fmt.Println appelle automatiquement String()
+
+### sort.Interface - Tri personnalisé
+type Interface interface {
+    Len() int
+    Less(i, j int) bool
+    Swap(i, j int)
+}
+
+### io.Reader/Writer - E/S
+type Reader interface {
+    Read([]byte) (int, error)
+}
+
+### 7.15.9 Exemples pratiques étendus
+
+### Interface pour animaux
+type Animal interface {
+    makeSound() string
+    move() string
+}
+
+type Dog struct{ name string }
+type Bird struct{ species string }
+
+func (d Dog) makeSound() string { return "Woof!" }
+func (d Dog) move() string { return "Running" }
+
+func (b Bird) makeSound() string { return "Tweet!" }
+func (b Bird) move() string { return "Flying" }
+
+func describe(a Animal) {
+    fmt.Printf("Sound: %s, Movement: %s\n", a.makeSound(), a.move())
+}
+
+### Collection polymorphe
+animals := []Animal{
+    Dog{name: "Rex"},
+    Bird{species: "Sparrow"},
+}
+
+for _, animal := range animals {
+    describe(animal)
+}
+
+### 7.15.10 Gestion d'erreurs avec assertion
+
+### Assertion sécurisée avec gestion d'erreur
+func getRadius(g geometry) (float64, error) {
+    if c, ok := g.(circle); ok {
+        return c.radius, nil
+    }
+    return 0, fmt.Errorf("not a circle")
+}
+
+### Utilisation
+if radius, err := getRadius(c); err == nil {
+    fmt.Printf("Radius: %.2f\n", radius)
+} else {
+    fmt.Println("Error:", err)
+}
+
+### 7.15.11 Patterns avancés
+
+### Interface avec validation
+type Validator interface {
+    Validate() error
+}
+
+func processIfValid(v Validator) error {
+    if err := v.Validate(); err != nil {
+        return fmt.Errorf("validation failed: %w", err)
+    }
+    // Traitement...
+    return nil
+}
+
+### Interface pour configuration
+type Configurable interface {
+    Configure(map[string]interface{}) error
+    GetConfig() map[string]interface{}
+}
+
+### Interface pour sérialisation
+type Serializable interface {
+    Marshal() ([]byte, error)
+    Unmarshal([]byte) error
+}
+
+### 7.15.12 Sortie du programme interfaces.go
+{3 4}                           // rect{width: 3, height: 4}
+12                              // area: 3 * 4 = 12
+14                              // perim: 2*(3+4) = 14
+{5}                             // circle{radius: 5}
+78.53981633974483              // area: π * 5² ≈ 78.54
+31.41592653589793              // perim: 2 * π * 5 ≈ 31.42
+                               // detectCircle(r) → rien (pas circle)
+circle with radius 5           // detectCircle(c) → c est circle !
+
+### 7.15.13 Performance et considérations
+
+### Overhead des interfaces
+- INDIRECTION : Appel via table de méthodes
+- ALLOCATION : Peut causer des allocations heap
+- OPTIMISATION : Compiler optimise certains cas
+
+### Quand utiliser les interfaces
+- POLYMORPHISME : Traitement uniforme de types différents
+- TESTABILITÉ : Mocking et tests unitaires
+- DÉCOUPLAGE : Séparation des préoccupations
+- EXTENSIBILITÉ : Facilite l'ajout de nouveaux types
+
+### Quand éviter
+- PERFORMANCE CRITIQUE : Utilisez types concrets
+- SIMPLE USAGE : Pas besoin si un seul type
+- OVER-ENGINEERING : N'ajoutez pas de complexité inutile
+
+### 7.15.14 Bonnes pratiques avec les interfaces
+
+### Design d'interfaces
+- PETITES INTERFACES : 1-3 méthodes maximum
+- NOMS DESCRIPTIFS : Reader, Writer, Stringer
+- SUFFIX -ER : Convention pour les interfaces
+- DÉFINITION AU BESOIN : Là où elles sont utilisées
+
+### Utilisation
+- ACCEPTER INTERFACES : Dans les paramètres de fonctions
+- RETOURNER TYPES CONCRETS : En général
+- COMPOSITION : Combiner petites interfaces
+- VALIDATION : Vérifier les types avec assertion
+
+### Éviter
+- INTERFACES TROP LARGES : Difficiles à implémenter
+- HIÉRARCHIES COMPLEXES : Go privilégie la simplicité
+- INTERFACES INUTILES : N'ajoutez que si nécessaire
+
 ### 7.11 Exemples pratiques
 
 ### Exemple 1 : Gestion d'utilisateurs
@@ -1777,6 +2083,1389 @@ func createPerson() *person {
 - Évitez la copie inutile de structures volumineuses
 - Utilisez l'embedding pour éviter l'indirection
 
+### 7.16 ÉNUMÉRATIONS (ENUMS) EN GO
+
+### 7.16.1 Caractéristiques des énumérations en Go
+
+### Go n'a pas d'enums natifs MAIS on les simule avec :
+- TYPE PERSONNALISÉ basé sur un type de base (int, string)
+- CONSTANTES avec iota pour la génération automatique
+- MÉTHODES pour ajouter des comportements
+- INTERFACE Stringer pour l'affichage
+
+### 7.16.2 Syntaxe de base avec iota
+
+### Déclaration d'un type enum
+type ServerState int
+
+### Déclaration des constantes avec iota
+const (
+    StateIdle ServerState = iota    // 0
+    StateConnected                  // 1
+    StateError                      // 2
+    StateRetrying                   // 3
+)
+
+### iota expliqué
+- COMPTEUR AUTOMATIQUE : Commence à 0, s'incrémente automatiquement
+- RÉINITIALISATION : Repart à 0 dans chaque bloc const
+- EXPRESSION : Peut être utilisé dans des calculs (iota * 2, 1 << iota)
+
+### 7.16.3 Mapping vers des chaînes
+
+### Table de correspondance
+var stateName = map[ServerState]string{
+    StateIdle:      "idle",
+    StateConnected: "connected",
+    StateError:     "error",
+    StateRetrying:  "retrying",
+}
+
+### Avantages du mapping
+- LISIBILITÉ : Noms explicites pour l'affichage
+- CENTRALISATION : Un seul endroit pour les libellés
+- MAINTENANCE : Facile de modifier les textes
+
+### 7.16.4 Interface Stringer
+
+### Implémentation de String()
+func (ss ServerState) String() string {
+    return stateName[ss]
+}
+
+### Avantages de Stringer
+- AFFICHAGE AUTOMATIQUE : fmt.Println() utilise String()
+- INTÉGRATION : Fonctionne avec tous les outils Go
+- DEBUGGING : Messages d'erreur plus lisibles
+- LOGS : Affichage naturel dans les logs
+
+### Exemple d'usage
+state := StateConnected
+fmt.Println(state)                    // Affiche: "connected"
+fmt.Printf("État: %v\n", state)      // Affiche: "État: connected"
+
+### 7.16.5 Machine à états avec switch
+
+### Fonction de transition
+func transition(s ServerState) ServerState {
+    switch s {
+    case StateIdle:
+        return StateConnected
+    case StateConnected, StateRetrying:    // Cas multiples
+        return StateIdle
+    case StateError:
+        return StateRetrying
+    default:
+        panic(fmt.Errorf("unknown state: %s", s))
+    }
+}
+
+### Gestion d'erreur robuste
+func (ss ServerState) String() string {
+    if name, ok := stateName[ss]; ok {
+        return name
+    }
+    return fmt.Sprintf("ServerState(%d)", int(ss))
+}
+
+### 7.16.6 Énumérations avec valeurs personnalisées
+
+### Avec des valeurs spécifiques
+type Priority int
+
+const (
+    Low Priority = iota * 10        // 0
+    Medium                          // 10
+    High                            // 20
+    Critical                        // 30
+)
+
+### Avec des puissances de 2 (flags)
+type Permission int
+
+const (
+    Read Permission = 1 << iota     // 1 (001)
+    Write                           // 2 (010)
+    Execute                         // 4 (100)
+)
+
+### Combinaison de flags
+fullAccess := Read | Write | Execute  // 7 (111)
+
+### 7.16.7 Énumérations basées sur string
+
+### Type string pour plus de lisibilité
+type Color string
+
+const (
+    Red   Color = "red"
+    Green Color = "green"
+    Blue  Color = "blue"
+)
+
+### Avantages des string enums
+- SÉRIALISATION JSON naturelle
+- DEBUGGING plus facile
+- INTEROPÉRABILITÉ avec autres systèmes
+
+### 7.16.8 Validation et sécurité
+
+### Fonction de validation
+func (ss ServerState) IsValid() bool {
+    switch ss {
+    case StateIdle, StateConnected, StateError, StateRetrying:
+        return true
+    default:
+        return false
+    }
+}
+
+### Parse depuis string
+func ParseServerState(s string) (ServerState, error) {
+    for state, name := range stateName {
+        if name == s {
+            return state, nil
+        }
+    }
+    return StateIdle, fmt.Errorf("invalid state: %s", s)
+}
+
+### 7.16.9 Énumérations avec méthodes
+
+### Ajout de comportements
+func (ss ServerState) CanTransitionTo(target ServerState) bool {
+    switch ss {
+    case StateIdle:
+        return target == StateConnected
+    case StateConnected:
+        return target == StateIdle || target == StateError
+    case StateError:
+        return target == StateRetrying
+    case StateRetrying:
+        return target == StateIdle || target == StateConnected
+    default:
+        return false
+    }
+}
+
+### Usage avec méthodes
+current := StateIdle
+if current.CanTransitionTo(StateConnected) {
+    current = StateConnected
+}
+
+### 7.16.10 Bonnes pratiques avec les énumérations
+
+### Nommage
+- PRÉFIXE COMMUN : StateIdle, StateConnected (évite les conflits)
+- CAMELCASE : Première lettre majuscule pour export
+- DESCRIPTIF : Noms clairs et explicites
+
+### Organisation
+- GROUPER : Toutes les constantes dans le même bloc
+- DOCUMENTER : Commentaires pour les valeurs importantes
+- VALIDER : Fonctions IsValid() pour la sécurité
+
+### Performance
+- TYPE NUMÉRIQUE : Plus rapide que string pour les comparaisons
+- TABLE DE MAPPING : Plus efficace que switch pour String()
+- CONST : Évaluées à la compilation, pas de surcharge runtime
+
+### Sécurité
+- VALIDATION : Vérifiez toujours les valeurs entrantes
+- DEFAULT CASE : Gérez les valeurs inconnues
+- TYPE SAFETY : Utilisez des types personnalisés
+
+### 7.16.11 Exemple complet d'énumération
+
+```go
+package main
+
+import "fmt"
+
+// Définition du type enum
+type OrderStatus int
+
+// Constantes avec iota
+const (
+    Pending OrderStatus = iota
+    Processing
+    Shipped
+    Delivered
+    Cancelled
+)
+
+// Table de mapping
+var statusNames = map[OrderStatus]string{
+    Pending:    "pending",
+    Processing: "processing", 
+    Shipped:    "shipped",
+    Delivered:  "delivered",
+    Cancelled:  "cancelled",
+}
+
+// Interface Stringer
+func (os OrderStatus) String() string {
+    if name, ok := statusNames[os]; ok {
+        return name
+    }
+    return fmt.Sprintf("OrderStatus(%d)", int(os))
+}
+
+// Validation
+func (os OrderStatus) IsValid() bool {
+    return os >= Pending && os <= Cancelled
+}
+
+// Logique métier
+func (os OrderStatus) CanTransitionTo(target OrderStatus) bool {
+    switch os {
+    case Pending:
+        return target == Processing || target == Cancelled
+    case Processing:
+        return target == Shipped || target == Cancelled
+    case Shipped:
+        return target == Delivered
+    default:
+        return false
+    }
+}
+
+func main() {
+    order := Pending
+    fmt.Printf("Statut initial: %s\n", order)
+    
+    if order.CanTransitionTo(Processing) {
+        order = Processing
+        fmt.Printf("Nouveau statut: %s\n", order)
+    }
+}
+```
+
+### 7.17 EMBEDDING DE STRUCTURES EN GO
+
+### 7.17.1 Concept d'embedding (composition)
+
+### Alternative à l'héritage
+- Go N'A PAS d'héritage classique comme Java/C#
+- COMPOSITION privilégiée sur l'héritage
+- EMBEDDING = inclure une structure dans une autre
+- PROMOTION automatique des champs et méthodes
+
+### 7.17.2 Syntaxe de base
+
+### Structure de base
+type base struct {
+    num int
+}
+
+func (b base) describe() string {
+    return fmt.Sprintf("base with num: %v", b.num)
+}
+
+### Structure avec embedding
+type container struct {
+    base        // ← Champ anonyme (embedding)
+    str string  // ← Champ propre à container
+}
+
+### Caractéristiques de l'embedding
+- CHAMP ANONYME : Pas de nom explicite pour le champ embedé
+- TYPE COMPLET : Le type entier est embedé, pas juste ses champs
+- EXTENSION : La structure peut ajouter ses propres champs et méthodes
+
+### 7.17.3 Promotion de champs
+
+### Accès direct aux champs embedés
+co := container{
+    base: base{num: 1},
+    str: "some name",
+}
+
+// ACCÈS DIRECT (promotion)
+fmt.Println(co.num)        // Équivalent à co.base.num
+
+// ACCÈS EXPLICITE
+fmt.Println(co.base.num)   // Accès traditionnel via le champ
+
+### Règles de promotion
+- CHAMPS PUBLICS : Automatiquement promus
+- CONFLITS : En cas de collision, accès explicite requis
+- NIVEAUX : Promotion sur plusieurs niveaux d'embedding
+
+### 7.17.4 Promotion de méthodes
+
+### Méthodes automatiquement disponibles
+// La méthode describe() de base est disponible sur container
+fmt.Println(co.describe())  // Appelle base.describe()
+
+### Mécanisme de promotion
+- MÉTHODES PUBLIQUES : Automatiquement promues
+- RECEIVER : Méthode appelée sur la structure embedée
+- INTERFACE : Peut satisfaire des interfaces via embedding
+
+### 7.17.5 Interfaces et embedding
+
+### Satisfaction d'interface automatique
+type describer interface {
+    describe() string
+}
+
+var d describer = co        // ✅ container satisfait describer
+fmt.Println(d.describe())   // Via la méthode de base
+
+### Avantages pour les interfaces
+- IMPLÉMENTATION AUTOMATIQUE : Pas besoin de réécrire les méthodes
+- COMPOSITION D'INTERFACES : Combiner plusieurs interfaces
+- POLYMORPHISME : Types composés utilisables partout
+
+### 7.17.6 Embedding multiple
+
+### Plusieurs structures embedées
+type reader struct {
+    source string
+}
+
+func (r reader) read() string {
+    return r.source
+}
+
+type writer struct {
+    destination string
+}
+
+func (w writer) write(data string) {
+    w.destination = data
+}
+
+type readWriter struct {
+    reader
+    writer
+    buffer string
+}
+
+### Usage de l'embedding multiple
+rw := readWriter{
+    reader: reader{source: "input"},
+    writer: writer{destination: "output"},
+    buffer: "temp",
+}
+
+// Accès aux méthodes des deux structures
+data := rw.read()           // De reader
+rw.write("new data")        // De writer
+
+### 7.17.7 Conflits et résolution
+
+### Gestion des conflits de noms
+type A struct {
+    name string
+}
+
+type B struct {
+    name string
+}
+
+type Combined struct {
+    A
+    B
+    ownName string
+}
+
+### Résolution des conflits
+c := Combined{}
+// c.name        // ❌ ERREUR : Ambigu
+c.A.name         // ✅ OK : Accès explicite à A.name
+c.B.name         // ✅ OK : Accès explicite à B.name
+c.ownName        // ✅ OK : Champ propre
+
+### 7.17.8 Embedding avec interfaces
+
+### Embedding d'interfaces
+type Reader interface {
+    Read() string
+}
+
+type Writer interface {
+    Write(string)
+}
+
+type ReadWriter interface {
+    Reader          // Embedding d'interface
+    Writer          // Embedding d'interface
+}
+
+### Implémentation par embedding
+type File struct {
+    name string
+}
+
+func (f File) Read() string { return f.name }
+func (f File) Write(s string) { f.name = s }
+
+type Document struct {
+    File            // Embedding de structure
+    content string
+}
+
+// Document implémente automatiquement ReadWriter !
+
+### 7.17.9 Redéfinition de méthodes
+
+### Override de méthodes embedées
+type base struct {
+    value int
+}
+
+func (b base) display() string {
+    return fmt.Sprintf("base: %d", b.value)
+}
+
+type enhanced struct {
+    base
+    extra string
+}
+
+// Redéfinition de la méthode
+func (e enhanced) display() string {
+    return fmt.Sprintf("enhanced: %d + %s", e.value, e.extra)
+}
+
+### Comportement de redéfinition
+e := enhanced{base: base{value: 42}, extra: "test"}
+fmt.Println(e.display())        // "enhanced: 42 + test"
+fmt.Println(e.base.display())   // "base: 42"
+
+### 7.17.10 Patterns courants avec embedding
+
+### Extension de types externes
+import "time"
+
+type CustomTime struct {
+    time.Time               // Embedding du type Time
+    timezone string
+}
+
+func (ct CustomTime) Display() string {
+    return fmt.Sprintf("%s (%s)", ct.Format("15:04"), ct.timezone)
+}
+
+### Composition de fonctionnalités
+type Logger struct {
+    prefix string
+}
+
+func (l Logger) Log(msg string) {
+    fmt.Printf("[%s] %s\n", l.prefix, msg)
+}
+
+type Service struct {
+    Logger              // Embedding pour logging
+    name string
+    port int
+}
+
+func (s Service) Start() {
+    s.Log(fmt.Sprintf("Starting %s on port %d", s.name, s.port))
+}
+
+### 7.17.11 Avantages de l'embedding
+
+### Réutilisabilité
+- PARTAGE DE COMPORTEMENTS : Réutilisation de méthodes existantes
+- COMPOSITION FLEXIBLE : Combiner différentes fonctionnalités
+- ÉVITER LA DUPLICATION : Pas besoin de réécrire du code
+
+### Maintenabilité
+- SÉPARATION DES RESPONSABILITÉS : Chaque structure a son rôle
+- MODIFICATIONS LOCALISÉES : Changements dans une seule structure
+- TESTS UNITAIRES : Tester chaque composant séparément
+
+### Performance
+- PAS DE SURCHARGE : Pas d'indirection supplémentaire
+- INLINING : Compilateur peut optimiser les accès
+- MÉMOIRE : Allocation contiguë des champs
+
+### 7.17.12 Quand utiliser l'embedding
+
+### Cas d'usage recommandés
+- EXTENSION DE TYPES : Ajouter des fonctionnalités à des types existants
+- COMPOSITION D'INTERFACES : Créer des interfaces complexes
+- PARTAGE DE COMPORTEMENTS : Réutiliser du code commun
+- POLYMORPHISME : Créer des hiérarchies flexibles
+
+### Alternatives à considérer
+- COMPOSITION EXPLICITE : Avec des champs nommés
+- INTERFACES : Pour le polymorphisme pur
+- FONCTIONS : Pour la logique stateless
+
+### 7.17.13 Bonnes pratiques
+
+### Design
+- COHÉRENCE : Embedder des types logiquement liés
+- SIMPLICITÉ : Éviter l'embedding trop profond
+- INTERFACE-FIRST : Définir les interfaces avant les implémentations
+- DOCUMENTATION : Clarifier les relations d'embedding
+
+### Nommage
+- TYPES CLAIRS : Noms expressifs pour les structures
+- ÉVITER LES CONFLITS : Prévenir les collisions de noms
+- CONVENTIONS : Suivre les standards Go
+
+### Performance
+- ÉVITER L'OVER-EMBEDDING : Ne pas embedder inutilement
+- CONSIDÉRER LA TAILLE : Impact sur la mémoire
+- PROFILER : Mesurer les performances en cas de doute
+
+### 7.17.14 Exemple complet d'embedding
+
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+// Structure de base pour l'audit
+type Auditable struct {
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    CreatedBy string
+}
+
+func (a *Auditable) SetCreated(by string) {
+    a.CreatedAt = time.Now()
+    a.CreatedBy = by
+}
+
+func (a *Auditable) SetUpdated() {
+    a.UpdatedAt = time.Now()
+}
+
+// Interface pour les entités identifiables
+type Identifiable interface {
+    GetID() int
+    SetID(int)
+}
+
+// Structure pour l'identification
+type Entity struct {
+    ID int
+}
+
+func (e Entity) GetID() int { return e.ID }
+func (e *Entity) SetID(id int) { e.ID = id }
+
+// Modèle utilisateur avec embedding
+type User struct {
+    Entity          // Embedding pour l'ID
+    Auditable       // Embedding pour l'audit
+    Username string
+    Email    string
+}
+
+func (u User) String() string {
+    return fmt.Sprintf("User{ID: %d, Username: %s, Email: %s}", 
+        u.ID, u.Username, u.Email)
+}
+
+func main() {
+    user := User{
+        Username: "alice",
+        Email:    "alice@example.com",
+    }
+    
+    // Utilisation des méthodes embedées
+    user.SetID(1)
+    user.SetCreated("admin")
+    
+    // User satisfait automatiquement Identifiable
+    var entity Identifiable = user
+    fmt.Printf("ID: %d\n", entity.GetID())
+    
+    // Accès direct aux champs embedés
+    fmt.Printf("Created at: %s\n", user.CreatedAt.Format("2006-01-02"))
+    
+    fmt.Println(user)
+}
+```
+
+### 7.18 GÉNÉRIQUES (GENERICS) EN GO
+
+### 7.18.1 Introduction aux génériques
+
+### Génériques introduits en Go 1.18
+- PARAMÈTRES DE TYPE : Types comme paramètres de fonctions/structures
+- TYPE SAFETY : Sécurité des types à la compilation
+- RÉUTILISABILITÉ : Code générique réutilisable
+- PERFORMANCE : Pas de boxing/unboxing comme interface{}
+
+### 7.18.2 Fonction générique simple
+
+### Syntaxe de base
+func Print[T any](s []T) {
+    for _, v := range s {
+        fmt.Print(v)
+    }
+}
+
+### Composants
+- [T any] : Paramètre de type T qui peut être n'importe quoi
+- T : Utilisé comme type dans les paramètres et variables
+- INFÉRENCE : Go déduit automatiquement le type
+
+### Usage
+Print([]int{1, 2, 3})        // T inféré comme int
+Print([]string{"a", "b"})    // T inféré comme string
+
+### 7.18.3 Contraintes de types
+
+### Contrainte any
+func Print[T any](s []T)     // T peut être n'importe quel type
+
+### Contrainte comparable
+func Equal[T comparable](a, b T) bool {
+    return a == b
+}
+
+### Types comparable
+- NOMBRES : int, float64, etc.
+- STRINGS : string
+- BOOLÉENS : bool  
+- POINTEURS : *T
+- ARRAYS : [n]T si T est comparable
+- STRUCTS : si tous les champs sont comparables
+
+### 7.18.4 Contraintes d'interface personnalisées
+
+### Interface comme contrainte
+type Person interface {
+    Work()
+}
+
+type worker string
+
+func (w worker) Work() {
+    fmt.Printf("%s is working\n", w)
+}
+
+func DoWork[T Person](things []T) {
+    for _, v := range things {
+        v.Work()
+    }
+}
+
+### Avantages
+- POLYMORPHISME : Fonctionne avec tout type implémentant Person
+- TYPE SAFETY : Garantit que T a la méthode Work()
+- FLEXIBILITÉ : Nouveaux types peuvent être ajoutés facilement
+
+### 7.18.5 Union de types (Type Sets)
+
+### Contrainte union
+type Number interface {
+    int | float64
+}
+
+func MultiplyTen[T Number](a T) T {
+    return a * 10
+}
+
+### Utilisation des unions
+- OPÉRATEURS : Permettent l'utilisation d'opérateurs arithmétiques
+- LIMITATION : Restreint aux types spécifiés
+- EXTENSIBILITÉ : Facile d'ajouter de nouveaux types
+
+### Exemple d'usage
+result1 := MultiplyTen(10)      // int -> 100
+result2 := MultiplyTen(5.55)    // float64 -> 55.5
+
+### 7.18.6 Types génériques personnalisés
+
+### Définition d'un type générique
+type GenericSlice[T any] []T
+
+### Méthodes sur types génériques
+func (g GenericSlice[T]) Print() {
+    for _, v := range g {
+        fmt.Println(v)
+    }
+}
+
+### Fonctions avec types génériques
+func PrintNew[T any](g GenericSlice[T]) {
+    for _, v := range g {
+        fmt.Println(v)
+    }
+}
+
+### Usage
+g := GenericSlice[int]{1, 2, 3}
+g.Print()       // Méthode du type
+PrintNew(g)     // Fonction externe
+
+### 7.18.7 Structures génériques complexes
+
+### Liste chaînée générique
+type List[T any] struct {
+    head, tail *element[T]
+}
+
+type element[T any] struct {
+    next *element[T]
+    val  T
+}
+
+### Méthodes sur structures génériques
+func (lst *List[T]) Push(v T) {
+    if lst.tail == nil {
+        lst.head = &element[T]{val: v}
+        lst.tail = lst.head
+    } else {
+        lst.tail.next = &element[T]{val: v}
+        lst.tail = lst.tail.next
+    }
+}
+
+func (lst *List[T]) AllElements() []T {
+    var elems []T
+    for e := lst.head; e != nil; e = e.next {
+        elems = append(elems, e.val)
+    }
+    return elems
+}
+
+### 7.18.8 Fonctions génériques avancées
+
+### Fonction de recherche dans slice
+func SlicesIndex[S ~[]E, E comparable](s S, v E) int {
+    for i := range s {
+        if v == s[i] {
+            return i
+        }
+    }
+    return -1
+}
+
+### Contraintes avancées
+- S ~[]E : S doit être basé sur le type sous-jacent []E
+- E comparable : E doit être comparable
+- APPROXIMATION (~) : Permet les types dérivés
+
+### Usage avec types personnalisés
+type MyStrings []string         // Type basé sur []string
+ms := MyStrings{"a", "b", "c"}
+index := SlicesIndex(ms, "b")   // Fonctionne grâce à ~[]E
+
+### 7.18.9 Inférence de type
+
+### Inférence automatique
+nums := []int{1, 2, 3}
+Print(nums)                     // T inféré comme int
+
+### Spécification explicite
+Print[int](nums)                // Type explicitement spécifié
+
+### Cas où l'inférence échoue
+- PARAMÈTRES AMBIGUS : Plusieurs interprétations possibles
+- TYPES COMPLEXES : Contraintes complexes
+- RETOUR SEUL : Quand seul le type de retour utilise T
+
+### 7.18.10 Patterns courants avec génériques
+
+### Map générique
+func Map[T, U any](slice []T, fn func(T) U) []U {
+    result := make([]U, len(slice))
+    for i, v := range slice {
+        result[i] = fn(v)
+    }
+    return result
+}
+
+### Filter générique
+func Filter[T any](slice []T, predicate func(T) bool) []T {
+    var result []T
+    for _, v := range slice {
+        if predicate(v) {
+            result = append(result, v)
+        }
+    }
+    return result
+}
+
+### Reduce générique
+func Reduce[T, U any](slice []T, initial U, fn func(U, T) U) U {
+    result := initial
+    for _, v := range slice {
+        result = fn(result, v)
+    }
+    return result
+}
+
+### 7.18.11 Contraintes prédéfinies
+
+### golang.org/x/exp/constraints
+import "golang.org/x/exp/constraints"
+
+type Signed = constraints.Signed       // int, int8, int16, int32, int64
+type Unsigned = constraints.Unsigned   // uint, uint8, uint16, uint32, uint64
+type Integer = constraints.Integer     // Signed | Unsigned
+type Float = constraints.Float         // float32, float64
+type Ordered = constraints.Ordered     // Integer | Float | string
+
+### Exemple avec contraintes prédéfinies
+func Max[T constraints.Ordered](a, b T) T {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+### 7.18.12 Limitations et considérations
+
+### Limitations actuelles
+- PAS DE SPÉCIALISATION : Pas de versions spécialisées d'une fonction
+- PAS DE MÉTAPROGRAMMATION : Pas de génération de code à l'exécution
+- COMPLEXITÉ : Syntaxe parfois lourde pour des cas simples
+
+### Considérations de performance
+- COMPILATION : Génération de code spécialisé
+- PAS DE BOXING : Évite les conversions vers interface{}
+- INLINING : Optimisations possibles par le compilateur
+
+### 7.18.13 Quand utiliser les génériques
+
+### Cas d'usage recommandés
+- COLLECTIONS : Slices, maps, structures de données
+- ALGORITHMES : Tri, recherche, transformation
+- UTILITAIRES : Fonctions réutilisables sur différents types
+- API : Quand plusieurs types similaires sont supportés
+
+### Quand préférer les interfaces
+- POLYMORPHISME DYNAMIQUE : Types déterminés à l'exécution
+- FLEXIBILITÉ : Besoin d'ajouter des types sans recompilation
+- SIMPLICITÉ : Cas simples avec peu de types
+
+### 7.18.14 Bonnes pratiques
+
+### Design des contraintes
+- MINIMALES : Utiliser les contraintes les plus simples possibles
+- EXPRESSIVES : Noms clairs pour les contraintes personnalisées
+- RÉUTILISABLES : Définir des contraintes réutilisables
+
+### Nommage
+- TYPES COURTS : T, U, V pour les paramètres simples
+- DESCRIPTIFS : Element, Key, Value pour des rôles spécifiques
+- CONVENTIONS : Suivre les standards de la communauté
+
+### 7.18.15 Exemple complet d'application
+
+```go
+package main
+
+import (
+    "fmt"
+    "golang.org/x/exp/constraints"
+)
+
+// Contrainte personnalisée
+type Numeric interface {
+    constraints.Integer | constraints.Float
+}
+
+// Calculatrice générique
+type Calculator[T Numeric] struct {
+    values []T
+}
+
+func NewCalculator[T Numeric]() *Calculator[T] {
+    return &Calculator[T]{values: make([]T, 0)}
+}
+
+func (c *Calculator[T]) Add(value T) {
+    c.values = append(c.values, value)
+}
+
+func (c *Calculator[T]) Sum() T {
+    var sum T
+    for _, v := range c.values {
+        sum += v
+    }
+    return sum
+}
+
+func (c *Calculator[T]) Average() T {
+    if len(c.values) == 0 {
+        return T(0)
+    }
+    return c.Sum() / T(len(c.values))
+}
+
+func (c *Calculator[T]) Max() T {
+    if len(c.values) == 0 {
+        return T(0)
+    }
+    max := c.values[0]
+    for _, v := range c.values[1:] {
+        if v > max {
+            max = v
+        }
+    }
+    return max
+}
+
+func main() {
+    // Calculatrice pour entiers
+    intCalc := NewCalculator[int]()
+    intCalc.Add(10)
+    intCalc.Add(20)
+    intCalc.Add(30)
+    fmt.Printf("Sum: %d, Average: %d, Max: %d\n", 
+        intCalc.Sum(), intCalc.Average(), intCalc.Max())
+    
+    // Calculatrice pour float64
+    floatCalc := NewCalculator[float64]()
+    floatCalc.Add(1.5)
+    floatCalc.Add(2.7)
+    floatCalc.Add(3.2)
+    fmt.Printf("Sum: %.2f, Average: %.2f, Max: %.2f\n", 
+        floatCalc.Sum(), floatCalc.Average(), floatCalc.Max())
+}
+```
+
+### 7.19 ITÉRATEURS (RANGE OVER ITERATORS) EN GO
+
+### 7.19.1 Introduction aux itérateurs
+
+### Itérateurs introduits en Go 1.23
+- PACKAGE ITER : Types iter.Seq[T] et iter.Seq2[K,V]
+- RANGE ÉTENDU : Support du range sur types personnalisés
+- LAZY EVALUATION : Génération à la demande
+- COMPOSABILITÉ : Chaînage et transformation d'itérateurs
+
+### 7.19.2 Package iter et types de base
+
+### Import nécessaire
+import (
+    "iter"
+    "slices"
+)
+
+### Types d'itérateurs
+- iter.Seq[T] : Séquence d'éléments de type T
+- iter.Seq2[K, V] : Séquence de paires clé-valeur
+
+### Signature d'un itérateur
+type Seq[V any] func(yield func(V) bool)
+// yield : fonction qui produit la prochaine valeur
+// bool : true continue, false arrête l'itération
+
+### 7.19.3 Implémentation d'itérateur personnalisé
+
+### Structure avec itérateur
+type List[T any] struct {
+    head, tail *element[T]
+}
+
+type element[T any] struct {
+    next *element[T]
+    val  T
+}
+
+### Méthode itérateur
+func (lst *List[T]) All() iter.Seq[T] {
+    return func(yield func(T) bool) {
+        for e := lst.head; e != nil; e = e.next {
+            if !yield(e.val) {
+                return
+            }
+        }
+    }
+}
+
+### Composants clés
+- RETOUR FONCTION : iter.Seq[T] est une fonction
+- YIELD : Produit la prochaine valeur
+- CONTRÔLE D'ARRÊT : Si yield retourne false, on arrête
+- PUSH ITERATOR : L'itérateur "pousse" les valeurs
+
+### 7.19.4 Générateur infini
+
+### Suite de Fibonacci infinie
+func genFib() iter.Seq[int] {
+    return func(yield func(int) bool) {
+        a, b := 1, 1
+        
+        for {
+            if !yield(a) {
+                return
+            }
+            a, b = b, a+b
+        }
+    }
+}
+
+### Caractéristiques
+- BOUCLE INFINIE : for {} avec génération continue
+- LAZY : Calculs uniquement à la demande
+- CONTRÔLABLE : Le consommateur peut arrêter avec break
+- MÉMOIRE CONSTANTE : Pas de stockage de toute la séquence
+
+### 7.19.5 Utilisation avec range
+
+### Itération sur structure personnalisée
+for e := range lst.All() {
+    fmt.Println(e)
+}
+
+### Collecte en slice
+all := slices.Collect(lst.All())
+fmt.Println("all:", all)
+
+### Itération avec condition d'arrêt
+for n := range genFib() {
+    if n >= 10 {
+        break
+    }
+    fmt.Println(n)
+}
+
+### Mécanismes
+- RANGE ÉTENDU : Fonctionne avec iter.Seq[T]
+- BREAK SUPPORT : Arrêt prématuré possible
+- SLICES.COLLECT : Conversion itérateur → slice
+
+### 7.19.6 Pattern d'implémentation
+
+### Structure type d'un itérateur
+func MyIterator[T any]() iter.Seq[T] {
+    return func(yield func(T) bool) {
+        // Initialisation
+        
+        for /* condition */ {
+            value := /* calcul prochaine valeur */
+            
+            if !yield(value) {
+                return // Utilisateur a fait break
+            }
+            
+            // Mise à jour pour prochaine itération
+        }
+    }
+}
+
+### Bonnes pratiques
+- VÉRIFIER YIELD : Toujours tester le retour de yield
+- GESTION D'ÉTAT : Maintenir l'état entre appels
+- CLEANUP : Nettoyer les ressources si nécessaire
+
+### 7.19.7 Itérateurs avec paires clé-valeur
+
+### Structure map personnalisée
+type MyMap[K comparable, V any] struct {
+    data map[K]V
+}
+
+### Itérateur clé-valeur
+func (m MyMap[K, V]) All() iter.Seq2[K, V] {
+    return func(yield func(K, V) bool) {
+        for key, value := range m.data {
+            if !yield(key, value) {
+                return
+            }
+        }
+    }
+}
+
+### Usage
+for key, value := range myMap.All() {
+    fmt.Printf("%v: %v\n", key, value)
+}
+
+### 7.19.8 Fonctions utilitaires avec itérateurs
+
+### Package slices étendu
+all := slices.Collect(lst.All())           // iter.Seq[T] → []T
+sorted := slices.Sorted(lst.All())         // Collecte et trie
+values := slices.Values(mySlice)           // []T → iter.Seq[T]
+
+### Fonctions de transformation
+func Filter[T any](seq iter.Seq[T], predicate func(T) bool) iter.Seq[T] {
+    return func(yield func(T) bool) {
+        for v := range seq {
+            if predicate(v) {
+                if !yield(v) {
+                    return
+                }
+            }
+        }
+    }
+}
+
+func Map[T, U any](seq iter.Seq[T], transform func(T) U) iter.Seq[U] {
+    return func(yield func(U) bool) {
+        for v := range seq {
+            if !yield(transform(v)) {
+                return
+            }
+        }
+    }
+}
+
+### 7.19.9 Chaînage d'itérateurs
+
+### Composition fonctionnelle
+numbers := slices.Values([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+filtered := Filter(numbers, func(x int) bool { return x%2 == 0 })
+doubled := Map(filtered, func(x int) int { return x * 2 })
+
+for result := range doubled {
+    fmt.Println(result) // 4, 8, 12, 16, 20
+}
+
+### Avantages du chaînage
+- LISIBILITÉ : Pipeline de transformation clair
+- EFFICACITÉ : Pas de stockage intermédiaire
+- LAZY : Évaluation paresseuse bout en bout
+
+### 7.19.10 Cas d'usage courants
+
+### Parcours de structures de données
+- ARBRES : Parcours en profondeur/largeur
+- GRAPHES : Exploration de nœuds
+- LISTES CHAÎNÉES : Parcours séquentiel
+- BASES DE DONNÉES : Résultats en streaming
+
+### Générateurs de données
+- SÉQUENCES MATHÉMATIQUES : Fibonacci, nombres premiers
+- DONNÉES DE TEST : Génération aléatoire
+- CONFIGURATION : Permutations, combinaisons
+
+### Pipeline de traitement
+- FICHIERS : Lecture ligne par ligne
+- RÉSEAU : Traitement de flux de données
+- TRANSFORMATION : ETL (Extract, Transform, Load)
+
+### 7.19.11 Comparaison avec approches traditionnelles
+
+### Itérateurs vs Slices
+| Aspect | Itérateurs | Slices |
+|--------|------------|--------|
+| Mémoire | Constante | Proportionnelle |
+| Évaluation | Lazy | Eager |
+| Arrêt précoce | Oui | Non optimisé |
+| Composabilité | Excellente | Limitée |
+| Performance | Variable | Prévisible |
+
+### Itérateurs vs Channels
+| Aspect | Itérateurs | Channels |
+|--------|------------|----------|
+| Concurrence | Non | Oui |
+| Simplicité | Plus simple | Plus complexe |
+| Overhead | Minimal | Buffer + goroutines |
+| Contrôle | Pull-based | Push-based |
+
+### 7.19.12 Performance et considérations
+
+### Avantages performance
+- MÉMOIRE : Pas d'allocation de slices intermédiaires
+- LAZY : Calculs uniquement si nécessaires
+- ARRÊT PRÉCOCE : Économie de calculs inutiles
+- CACHE : Meilleure localité des données
+
+### Considérations
+- OVERHEAD : Appels de fonction supplémentaires
+- DEBUGGING : Plus difficile à déboguer
+- COMPATIBILITÉ : Nécessite Go 1.23+
+- COMPLEXITÉ : Plus complexe que les boucles simples
+
+### 7.19.13 Patterns avancés
+
+### Itérateur avec état
+func Counter(start, step int) iter.Seq[int] {
+    return func(yield func(int) bool) {
+        current := start
+        for {
+            if !yield(current) {
+                return
+            }
+            current += step
+        }
+    }
+}
+
+### Itérateur avec limite
+func Take[T any](seq iter.Seq[T], n int) iter.Seq[T] {
+    return func(yield func(T) bool) {
+        count := 0
+        for v := range seq {
+            if count >= n {
+                return
+            }
+            if !yield(v) {
+                return
+            }
+            count++
+        }
+    }
+}
+
+### Usage combiné
+for n := range Take(Counter(0, 2), 5) {
+    fmt.Println(n) // 0, 2, 4, 6, 8
+}
+
+### 7.19.14 Gestion des ressources
+
+### Itérateur avec cleanup
+func ReadLines(filename string) iter.Seq[string] {
+    return func(yield func(string) bool) {
+        file, err := os.Open(filename)
+        if err != nil {
+            return
+        }
+        defer file.Close()
+        
+        scanner := bufio.NewScanner(file)
+        for scanner.Scan() {
+            if !yield(scanner.Text()) {
+                return
+            }
+        }
+    }
+}
+
+### Pattern de ressources
+- DEFER : Toujours nettoyer les ressources
+- EARLY RETURN : Respecter l'arrêt prématuré
+- ERROR HANDLING : Gérer les erreurs proprement
+
+### 7.19.15 Bonnes pratiques
+
+### Conception d'itérateurs
+- SINGLE RESPONSIBILITY : Un itérateur, une responsabilité
+- LAZY PAR DÉFAUT : Éviter les calculs prématurés
+- YIELD CHECKING : Toujours vérifier le retour de yield
+- ÉTAT MINIMAL : Garder l'état minimal nécessaire
+
+### Nommage et documentation
+- NOMS DESCRIPTIFS : All(), Values(), Keys()
+- DOCUMENTATION : Expliquer le comportement lazy
+- EXEMPLES : Montrer l'usage typique
+
+### Performance
+- PROFILING : Mesurer vs solutions alternatives
+- INLINING : Préférer les petites fonctions
+- ALLOCATION : Éviter les allocations dans les boucles
+
+### 7.19.16 Exemple complet d'application
+
+```go
+package main
+
+import (
+    "fmt"
+    "iter"
+    "slices"
+    "strings"
+)
+
+// Structure pour un arbre binaire
+type TreeNode[T any] struct {
+    Value T
+    Left  *TreeNode[T]
+    Right *TreeNode[T]
+}
+
+// Itérateur pour parcours en ordre
+func (node *TreeNode[T]) InOrder() iter.Seq[T] {
+    return func(yield func(T) bool) {
+        var traverse func(*TreeNode[T]) bool
+        traverse = func(n *TreeNode[T]) bool {
+            if n == nil {
+                return true
+            }
+            
+            if !traverse(n.Left) {
+                return false
+            }
+            
+            if !yield(n.Value) {
+                return false
+            }
+            
+            return traverse(n.Right)
+        }
+        
+        traverse(node)
+    }
+}
+
+// Utilitaires de transformation
+func Filter[T any](seq iter.Seq[T], predicate func(T) bool) iter.Seq[T] {
+    return func(yield func(T) bool) {
+        for v := range seq {
+            if predicate(v) {
+                if !yield(v) {
+                    return
+                }
+            }
+        }
+    }
+}
+
+func Map[T, U any](seq iter.Seq[T], transform func(T) U) iter.Seq[U] {
+    return func(yield func(U) bool) {
+        for v := range seq {
+            if !yield(transform(v)) {
+                return
+            }
+        }
+    }
+}
+
+func main() {
+    // Construction d'un arbre
+    root := &TreeNode[int]{
+        Value: 5,
+        Left: &TreeNode[int]{
+            Value: 3,
+            Left:  &TreeNode[int]{Value: 1},
+            Right: &TreeNode[int]{Value: 4},
+        },
+        Right: &TreeNode[int]{
+            Value: 8,
+            Left:  &TreeNode[int]{Value: 7},
+            Right: &TreeNode[int]{Value: 9},
+        },
+    }
+    
+    // Pipeline de transformation avec itérateurs
+    evenDoubled := Map(
+        Filter(root.InOrder(), func(x int) bool { return x%2 == 0 }),
+        func(x int) string { return fmt.Sprintf("even_%d", x*2) },
+    )
+    
+    // Collecte du résultat
+    result := slices.Collect(evenDoubled)
+    fmt.Println("Résultat:", strings.Join(result, ", "))
+    
+    // Parcours avec arrêt prématuré
+    fmt.Println("Premiers nombres > 3:")
+    count := 0
+    for value := range root.InOrder() {
+        if value > 3 {
+            fmt.Println(value)
+            count++
+            if count >= 3 {
+                break
+            }
+        }
+    }
+}
+```
+
 ## 8. STRUCTURE D'UN PROGRAMME GO
 
 ```go
@@ -1836,6 +3525,14 @@ func main() {         // Fonction principale
 - Préférez les méthodes aux fonctions pour l'organisation du code
 - Implémentez String() pour un affichage personnalisé des structures
 - Utilisez le chaînage de méthodes pour une syntaxe fluide
+- Définissez des interfaces pour créer des contrats flexibles
+- Utilisez l'implémentation implicite des interfaces (pas de "implements")
+- Préférez les petites interfaces (1-3 méthodes maximum)
+- Utilisez type assertion (v.(Type)) pour récupérer les types concrets
+- Employez type switch pour gérer plusieurs types d'interface
+- Nommez les interfaces avec le suffix -er (Reader, Writer, Stringer)
+- Acceptez des interfaces en paramètres, retournez des types concrets
+- Utilisez la composition d'interfaces pour la modularité
 
 ## 10. RESSOURCES D'APPRENTISSAGE
 
