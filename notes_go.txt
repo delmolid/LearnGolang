@@ -1,0 +1,3552 @@
+# NOTES D'APPRENTISSAGE GO
+
+## 1. PACKAGE FMT - FORMATAGE ET AFFICHAGE
+
+### Import
+import "fmt"
+
+### Fonctions principales d'affichage
+- fmt.Print()    : Affiche sans saut de ligne
+- fmt.Println()  : Affiche avec saut de ligne automatique + espaces entre arguments
+- fmt.Printf()   : Affichage avec formatage personnalisé
+
+### Verbes de formatage courants
+%s - string (chaîne de caractères)
+%d - int (entier décimal)
+%f - float (nombre décimal)
+%t - bool (booléen true/false)
+%v - any (valeur par défaut)
+%T - any (type de la variable)
+
+### Autres fonctions utiles
+- fmt.Sprintf() : Formatage sans affichage (retourne une string)
+- fmt.Scan()    : Lecture d'entrée utilisateur
+
+### Exemples
+fmt.Println("Hello World")                    // Hello World
+fmt.Printf("Je m'appelle %s\n", "Alice")     // Je m'appelle Alice
+fmt.Printf("Age: %d ans\n", 25)              // Age: 25 ans
+
+## 2. VARIABLES EN GO
+
+### Déclaration avec var
+var a = "initial"           // Type inféré
+var b, c int = 1, 2        // Déclaration multiple avec type explicite
+var d = true               // Booléen
+var e int                  // Valeur zéro (0 pour int)
+
+### Déclaration courte avec :=
+f := "apple"               // Équivalent à var f = "apple"
+
+### Valeurs zéro par défaut
+- int: 0
+- string: ""
+- bool: false
+- float: 0.0
+
+## 2.1 CONSTANTES EN GO
+
+### Déclaration de constantes
+const s string = "constant"     // Constante typée
+const n = 500000000            // Constante non typée (plus flexible)
+const pi = 3.14159             // Constante numérique
+
+### Constantes typées vs non typées
+- Constante typée : const typedConst int = 42
+- Constante non typée : const untypedConst = 42 (plus flexible)
+
+### Caractéristiques des constantes
+- IMMUTABLES : Ne peuvent jamais être modifiées
+- ÉVALUÉES À LA COMPILATION : Valeurs calculées avant l'exécution
+- EXPRESSIONS CONSTANTES : Peuvent être des calculs avec des valeurs constantes
+- CONVERSION AUTOMATIQUE : Les constantes non typées s'adaptent au contexte
+
+### Types de constantes possibles
+- Booléens : const isActive = true
+- Chaînes : const message = "Hello"
+- Numériques : const pi = 3.14159
+- Caractères : const letter = 'A'
+
+### Avantages des constantes non typées
+- Flexibilité avec différents types numériques
+- Précision arbitraire dans les calculs
+- Conversion automatique selon le contexte
+
+### Exemples d'utilisation
+const d = 3e20 / n                    // Calcul à la compilation
+fmt.Println(int64(d))                 // Conversion vers int64
+fmt.Println(math.Sin(n))              // Conversion automatique vers float64
+
+### Notation scientifique
+3e20 = 3 × 10²⁰ = 300000000000000000000
+
+## 3. TYPES DE DONNÉES DE BASE
+
+### Strings
+- Concaténation avec +
+- Exemple: "go" + "lang" = "golang"
+
+### Entiers et flottants
+- Opérations arithmétiques: +, -, *, /
+- Exemple: 1+1 = 2, 7.0/3.0 = 2.333...
+
+### Booléens
+- Opérateurs logiques:
+  - && (ET logique)
+  - || (OU logique)
+  - !  (NON logique)
+- Exemple: true && false = false
+
+## 3.1 TABLEAUX (ARRAYS) EN GO
+
+### Caractéristiques des tableaux
+- TAILLE FIXE : Définie à la compilation
+- TYPE HOMOGÈNE : Tous les éléments du même type
+- INDEXATION : Commence à 0
+- VALEURS PAR DÉFAUT : Zéro pour le type (0 pour int, "" pour string)
+
+### 3.1.1 Déclaration de tableaux
+
+### Déclaration avec taille explicite
+var arr [5]int                        // Tableau de 5 entiers, initialisé à [0 0 0 0 0]
+
+### Déclaration avec initialisation
+arr := [5]int{1, 2, 3, 4, 5}         // Tableau avec valeurs initiales
+
+### Taille automatique
+arr := [...]int{1, 2, 3, 4, 5}       // Go calcule automatiquement la taille (5)
+
+### 3.1.2 Opérations sur les tableaux
+
+### Accès aux éléments
+element := arr[2]                     // Récupère l'élément à l'index 2
+arr[4] = 100                         // Modifie l'élément à l'index 4
+
+### Longueur du tableau
+length := len(arr)                    // Retourne la taille du tableau
+
+### Parcours avec range (index et valeur)
+for i, value := range arr {
+    fmt.Printf("Index: %d, Valeur: %d\n", i, value)
+}
+
+### Parcours avec range (index seulement)
+for i := range arr {
+    fmt.Printf("Index: %d, Valeur: %d\n", i, arr[i])
+}
+
+### 3.1.3 Tableaux multidimensionnels
+
+### Déclaration tableau 2D
+var matrix [2][3]int                  // 2 lignes, 3 colonnes
+
+### Initialisation avec boucles
+for i := range 2 {
+    for j := range 3 {
+        matrix[i][j] = i + j          // Remplit avec la somme des indices
+    }
+}
+// Résultat: [[0 1 2] [1 2 3]]
+
+### Initialisation directe
+matrix := [2][3]int{
+    {1, 2, 3},                        // Première ligne
+    {4, 5, 6},                        // Deuxième ligne
+}
+
+### Accès aux éléments 2D
+element := matrix[1][2]               // Élément ligne 1, colonne 2
+matrix[0][1] = 10                     // Modification d'un élément
+
+### 3.1.4 Exemples pratiques
+
+### Tableau simple
+var scores [5]int
+scores[0] = 95
+scores[1] = 87
+fmt.Println("Scores:", scores)        // [95 87 0 0 0]
+fmt.Println("Longueur:", len(scores)) // 5
+
+### Tableau avec valeurs
+names := [3]string{"Alice", "Bob", "Charlie"}
+for i, name := range names {
+    fmt.Printf("Personne %d: %s\n", i+1, name)
+}
+
+### Matrice 2D pratique
+var grid [3][3]int
+// Remplir la diagonale
+for i := range 3 {
+    grid[i][i] = 1
+}
+fmt.Println("Matrice identité:", grid) // [[1 0 0] [0 1 0] [0 0 1]]
+
+## 3.2 SLICES EN GO
+
+### Différences Slices vs Arrays
+- TAILLE DYNAMIQUE vs Fixe
+- Plus flexibles et couramment utilisées
+- Built-in sur un array sous-jacent
+
+### 3.2.1 États d'une slice
+
+### Slice nil (non initialisée)
+var s []string                        // Slice nil
+fmt.Println(s == nil)                 // true
+fmt.Println(len(s))                   // 0
+fmt.Println(cap(s))                   // 0
+
+### Slice vide (mais pas nil)
+s := make([]string, 0)                // Slice vide initialisée
+fmt.Println(s == nil)                 // false
+fmt.Println(len(s))                   // 0
+
+### Slice avec éléments
+s := []string{"a", "b", "c"}          // Slice littérale
+fmt.Println(len(s))                   // 3
+
+### 3.2.2 Création de slices
+
+### Avec make() - longueur et capacité
+s := make([]int, 5, 10)               // len=5, cap=10, éléments=[0 0 0 0 0]
+s := make([]int, 5)                   // len=5, cap=5
+
+### Slice littérale
+s := []string{"hello", "world"}       // Création directe avec valeurs
+
+### À partir d'un array
+arr := [5]int{1, 2, 3, 4, 5}
+s := arr[1:4]                         // Slice de l'array: [2 3 4]
+
+### 3.2.3 Opérations sur les slices
+
+### Accès et modification
+s[0] = "nouveau"                      // Modification d'un élément
+element := s[2]                       // Accès à un élément
+
+### Ajout d'éléments avec append()
+s = append(s, "nouvel élément")       // Ajoute un élément
+s = append(s, "elem1", "elem2")       // Ajoute plusieurs éléments
+s = append(s, autreSlice...)          // Ajoute tous les éléments d'une autre slice
+
+### Longueur et capacité
+fmt.Println("Longueur:", len(s))      // Nombre d'éléments actuels
+fmt.Println("Capacité:", cap(s))      // Capacité maximale sans réallocation
+
+### 3.2.4 Slicing (sous-slices)
+
+### Syntaxes de slicing
+s := []string{"a", "b", "c", "d", "e"}
+sub1 := s[1:4]                        // [b c d] - index 1 à 3
+sub2 := s[:3]                         // [a b c] - début à index 2
+sub3 := s[2:]                         // [c d e] - index 2 à la fin
+sub4 := s[:]                          // [a b c d e] - copie complète
+
+### 3.2.5 Copie de slices
+
+### Copie avec copy()
+original := []int{1, 2, 3, 4, 5}
+copie := make([]int, len(original))
+copy(copie, original)                 // Copie tous les éléments
+
+### Copie partielle
+copy(copie[1:], original[2:4])        // Copie partielle
+
+### 3.2.6 Comparaison de slices
+
+### Avec le package slices (Go 1.21+)
+import "slices"
+
+s1 := []string{"a", "b", "c"}
+s2 := []string{"a", "b", "c"}
+if slices.Equal(s1, s2) {             // Comparaison du contenu
+    fmt.Println("Slices identiques")
+}
+
+### 3.2.7 Slices 2D (slice de slices)
+
+### Création d'une matrice irrégulière
+twoD := make([][]int, 3)              // 3 lignes
+for i := range 3 {
+    innerLen := i + 1                 // Longueur variable par ligne
+    twoD[i] = make([]int, innerLen)   // Ligne de longueur variable
+    for j := range innerLen {
+        twoD[i][j] = i + j
+    }
+}
+// Résultat: [[0] [1 2] [2 3 4]]
+
+### Matrice régulière
+matrix := make([][]int, 3)            // 3 lignes
+for i := range matrix {
+    matrix[i] = make([]int, 4)        // 4 colonnes par ligne
+}
+
+### 3.2.8 Gestion de la capacité
+
+### Pré-allocation pour optimiser les performances
+s := make([]int, 0, 100)              // len=0, cap=100
+for i := 0; i < 50; i++ {
+    s = append(s, i)                  // Pas de réallocation
+}
+
+### Croissance automatique de la capacité
+var s []int                           // cap=0
+s = append(s, 1)                      // cap devient 1
+s = append(s, 2)                      // cap devient 2  
+s = append(s, 3)                      // cap devient 4
+s = append(s, 4)                      // cap reste 4
+s = append(s, 5)                      // cap devient 8 (doublée)
+
+### Vérifier l'espace libre
+espaceLibre := cap(s) - len(s)
+
+### 3.2.9 Parcours de slices
+
+### Avec range (index et valeur)
+for i, value := range s {
+    fmt.Printf("Index: %d, Valeur: %v\n", i, value)
+}
+
+### Avec range (index seulement)
+for i := range s {
+    fmt.Printf("Index: %d\n", i)
+}
+
+### Avec range (valeur seulement)
+for _, value := range s {
+    fmt.Printf("Valeur: %v\n", value)
+}
+
+### 3.2.10 Exemples pratiques de slices
+
+### Filtrage d'éléments
+numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+var evens []int
+for _, num := range numbers {
+    if num%2 == 0 {
+        evens = append(evens, num)    // [2 4 6 8 10]
+    }
+}
+
+### Suppression d'un élément (à l'index i)
+s := []string{"a", "b", "c", "d", "e"}
+i := 2  // Supprimer "c"
+s = append(s[:i], s[i+1:]...)         // [a b d e]
+
+### Insertion d'un élément
+s := []string{"a", "b", "d", "e"}
+i := 2  // Insérer "c" à l'index 2
+s = append(s[:i], append([]string{"c"}, s[i:]...)...)  // [a b c d e]
+
+## 3.3 MAPS (CARTES/DICTIONNAIRES) EN GO
+
+### Qu'est-ce qu'une map ?
+- STRUCTURE CLÉ-VALEUR : Associe des clés uniques à des valeurs
+- NON ORDONNÉE : L'ordre des éléments n'est pas garanti
+- TYPE DE RÉFÉRENCE : Comme les slices et channels
+- ÉQUIVALENT : Dictionnaire, HashMap, Table de hachage
+
+### 3.3.1 Création de maps
+
+### Avec make()
+m := make(map[string]int)             // Map vide clé=string, valeur=int
+m := make(map[string]int, 10)         // Avec capacité initiale (optimisation)
+
+### Map littérale
+m := map[string]int{
+    "alice": 25,
+    "bob":   30,
+    "charlie": 35,
+}
+
+### Map vide avec type
+var m map[string]int                  // Map nil (doit être initialisée avant usage)
+m = make(map[string]int)              // Initialisation nécessaire
+
+### 3.3.2 Opérations de base
+
+### Ajout et modification
+m["clé"] = valeur                     // Ajoute ou modifie
+m["alice"] = 26                       // Modifie la valeur existante
+m["diana"] = 28                       // Ajoute une nouvelle entrée
+
+### Accès aux valeurs
+valeur := m["alice"]                  // Récupère la valeur (26)
+valeur := m["inexistante"]            // Retourne valeur zéro du type (0 pour int)
+
+### Accès avec vérification d'existence
+valeur, existe := m["alice"]
+if existe {
+    fmt.Printf("Alice a %d ans\n", valeur)
+} else {
+    fmt.Println("Alice non trouvée")
+}
+
+### Longueur de la map
+taille := len(m)                      // Nombre de paires clé-valeur
+
+### 3.3.3 Suppression et nettoyage
+
+### Suppression d'un élément
+delete(m, "bob")                      // Supprime la paire clé-valeur
+delete(m, "inexistante")              // Pas d'erreur si la clé n'existe pas
+
+### Vider complètement une map (Go 1.21+)
+clear(m)                              // Supprime tous les éléments
+fmt.Println(len(m))                   // 0
+
+### 3.3.4 Parcours de maps
+
+### Parcours clé-valeur
+for clé, valeur := range m {
+    fmt.Printf("%s: %d\n", clé, valeur)
+}
+
+### Parcours clés seulement
+for clé := range m {
+    fmt.Printf("Clé: %s\n", clé)
+}
+
+### Parcours valeurs seulement
+for _, valeur := range m {
+    fmt.Printf("Valeur: %d\n", valeur)
+}
+
+### Note sur l'ordre
+// L'ordre de parcours est ALÉATOIRE et peut changer entre les exécutions
+
+### 3.3.5 Comparaison de maps
+
+### Avec le package maps (Go 1.21+)
+import "maps"
+
+m1 := map[string]int{"foo": 1, "bar": 2}
+m2 := map[string]int{"foo": 1, "bar": 2}
+if maps.Equal(m1, m2) {              // Compare le contenu
+    fmt.Println("Maps identiques")
+}
+
+### Comparaison manuelle (versions antérieures)
+func mapsEqual(m1, m2 map[string]int) bool {
+    if len(m1) != len(m2) {
+        return false
+    }
+    for k, v1 := range m1 {
+        if v2, ok := m2[k]; !ok || v1 != v2 {
+            return false
+        }
+    }
+    return true
+}
+
+### 3.3.6 Types de maps courantes
+
+### Map string vers int (compteurs)
+compteurs := map[string]int{
+    "pommes":  5,
+    "oranges": 3,
+}
+
+### Map string vers bool (ensembles)
+ensemble := map[string]bool{
+    "alice": true,
+    "bob":   true,
+}
+
+### Map int vers string (index vers nom)
+noms := map[int]string{
+    1: "premier",
+    2: "deuxième",
+    3: "troisième",
+}
+
+### Map string vers slice (groupement)
+groupes := map[string][]string{
+    "fruits":   {"pomme", "orange", "banane"},
+    "légumes":  {"carotte", "brocoli"},
+}
+
+### 3.3.7 Exemples pratiques
+
+### Comptage d'occurrences
+text := "hello world hello"
+compteur := make(map[string]int)
+mots := strings.Fields(text)
+for _, mot := range mots {
+    compteur[mot]++                   // Incrémente le compteur
+}
+// Résultat: map[hello:2 world:1]
+
+### Vérification d'appartenance (ensemble)
+autorisés := map[string]bool{
+    "admin": true,
+    "user":  true,
+}
+if autorisés["admin"] {
+    fmt.Println("Accès autorisé")
+}
+
+### Cache/mémoisation
+cache := make(map[int]int)
+func fibonacci(n int) int {
+    if n <= 1 {
+        return n
+    }
+    if val, ok := cache[n]; ok {
+        return val                    // Valeur en cache
+    }
+    result := fibonacci(n-1) + fibonacci(n-2)
+    cache[n] = result                 // Mise en cache
+    return result
+}
+
+### Regroupement de données
+personnes := []struct{nom string; age int}{
+    {"Alice", 25}, {"Bob", 30}, {"Charlie", 25},
+}
+parAge := make(map[int][]string)
+for _, p := range personnes {
+    parAge[p.age] = append(parAge[p.age], p.nom)
+}
+// Résultat: map[25:[Alice Charlie] 30:[Bob]]
+
+### 3.3.8 Maps imbriquées
+
+### Map de maps
+utilisateurs := map[string]map[string]interface{}{
+    "alice": {
+        "age":    25,
+        "email":  "alice@example.com",
+        "active": true,
+    },
+    "bob": {
+        "age":    30,
+        "email":  "bob@example.com", 
+        "active": false,
+    },
+}
+
+### Accès aux données imbriquées
+if user, ok := utilisateurs["alice"]; ok {
+    if age, ok := user["age"].(int); ok {
+        fmt.Printf("Alice a %d ans\n", age)
+    }
+}
+
+### 3.3.9 Gestion d'erreurs avec maps
+
+### Vérification avant accès
+func getUser(id string, users map[string]User) (User, error) {
+    user, exists := users[id]
+    if !exists {
+        return User{}, fmt.Errorf("utilisateur %s non trouvé", id)
+    }
+    return user, nil
+}
+
+### Pattern d'initialisation sûre
+func safeMapAccess(m map[string]int, key string) int {
+    if m == nil {
+        return 0
+    }
+    return m[key]  // Retourne 0 si la clé n'existe pas
+}
+
+## 4. CONDITIONS ET STRUCTURES DE CONTRÔLE
+
+### 4.1 Structure if/else if/else
+if condition1 {
+    // code si condition1 est vraie
+} else if condition2 {
+    // code si condition2 est vraie
+} else {
+    // code si aucune condition n'est vraie
+}
+
+### 4.2 Opérateurs de comparaison
+- == : égal à
+- != : différent de
+- <  : inférieur à
+- <= : inférieur ou égal à
+- >  : supérieur à
+- >= : supérieur ou égal à
+
+### 4.3 Opérateurs logiques
+- && : ET logique (AND)
+- || : OU logique (OR)
+- !  : NON logique (NOT)
+
+### 4.4 if avec déclaration courte
+if variable := valeur; condition {
+    // variable est accessible ici seulement
+}
+// variable n'est plus accessible ici
+
+### Exemple pratique
+if num := 9; num < 0 {
+    fmt.Println(num, "is negative")
+} else if num < 10 {
+    fmt.Println(num, "has 1 digit")
+} else {
+    fmt.Println(num, "has multiple digits")
+}
+// Sortie: 9 has 1 digit
+
+### 4.5 Tests de parité et divisibilité
+// Test de parité
+if 7%2 == 0 {
+    fmt.Println("7 is even")
+} else {
+    fmt.Println("7 is odd")  // Cette branche s'exécute
+}
+
+// Test de divisibilité
+if 8%4 == 0 {
+    fmt.Println("8 is divisible by 4")  // Cette condition est vraie
+}
+
+// Condition avec OR
+if 8%2 == 0 || 7%2 == 0 {
+    fmt.Println("either 8 or 7 are even")  // true || false = true
+}
+
+### Avantages de la déclaration courte dans if
+- Portée limitée : la variable n'existe que dans le bloc if/else
+- Code plus propre : évite la pollution de l'espace de noms
+- Lisibilité : la logique est contenue dans le bloc
+
+### 4.6 SWITCH - Alternative élégante à if/else
+
+### Types de switch en Go
+1. Switch classique : switch variable { case valeur: }
+2. Switch conditionnel : switch { case condition: }
+3. Type switch : switch variable.(type) { case type: }
+
+### 4.6.1 Switch basique
+i := 2
+switch i {
+case 1:
+    fmt.Println("One")
+case 2:
+    fmt.Println("Two")    // Cette branche s'exécute
+case 3:
+    fmt.Println("Three")
+}
+
+### 4.6.2 Switch avec cases multiples
+switch time.Now().Weekday() {
+case time.Saturday, time.Sunday:
+    fmt.Println("It's the weekend")
+default:
+    fmt.Println("It's weekday")
+}
+
+### 4.6.3 Switch sans expression (conditionnel)
+t := time.Now()
+switch {
+case t.Hour() < 12:
+    fmt.Println("It's before noon")
+default:
+    fmt.Println("It's after noon")
+}
+// Équivalent à switch true
+
+### 4.6.4 Type Switch
+whatAmI := func(i interface{}) {
+    switch t := i.(type) {
+    case bool:
+        fmt.Println("I'm a bool")
+    case int:
+        fmt.Println("I'm a int")
+    default:
+        fmt.Printf("Don't Know type %T\n", t)
+    }
+}
+whatAmI(true)   // I'm a bool
+whatAmI(1)      // I'm a int
+whatAmI("hey")  // Don't Know type string
+
+### Caractéristiques du switch en Go
+- PAS DE BREAK nécessaire (pas de fall-through automatique)
+- Cases multiples : case a, b, c:
+- Conditions dans les cases : case x > 10:
+- default : cas par défaut optionnel
+- Type switching unique à Go
+
+### interface{} (type vide)
+- Peut contenir n'importe quelle valeur
+- Utilisé pour les fonctions génériques
+- i.(type) : syntaxe pour obtenir le type concret
+
+### Avantages du switch
+- Plus lisible que de multiples if/else
+- Performance optimisée
+- Support natif des types
+- Pas de risque d'oubli de break
+
+## 5. BOUCLES ET STRUCTURES DE CONTRÔLE
+
+### Types de boucles for en Go
+Go n'a qu'un seul type de boucle : for (remplace while, do-while, etc.)
+
+### 5.1 Boucle for basique (style while)
+i := 1
+for i <= 3 {
+    fmt.Println(i)
+    i = i + 1
+}
+// Sortie: 1, 2, 3
+
+### 5.2 Boucle for style C
+for j := 0; j < 3; j++ {
+    fmt.Println("range", j)
+}
+// Structure: for initialisation; condition; post-statement
+// Sortie: range 0, range 1, range 2
+
+### 5.3 Boucle for range avec entier (Go 1.22+)
+for i := range 3 {
+    fmt.Println("range", i)
+}
+// range 3 génère les valeurs 0, 1, 2
+// Plus concis que for i := 0; i < 3; i++
+
+### 5.4 Boucle for range avec tableaux
+arr := [3]int{10, 20, 30}
+
+// Avec index et valeur
+for i, value := range arr {
+    fmt.Printf("arr[%d] = %d\n", i, value)
+}
+
+// Avec index seulement
+for i := range arr {
+    fmt.Printf("Index: %d\n", i)
+}
+
+// Avec valeur seulement (utiliser _)
+for _, value := range arr {
+    fmt.Printf("Valeur: %d\n", value)
+}
+
+### 5.5 Boucle for range avec slices
+s := []string{"a", "b", "c"}
+
+// Parcours complet
+for i, value := range s {
+    fmt.Printf("s[%d] = %s\n", i, value)
+}
+
+// Index seulement
+for i := range s {
+    fmt.Println("Index:", i)
+}
+
+// Valeur seulement
+for _, value := range s {
+    fmt.Println("Valeur:", value)
+}
+
+### 5.6 Boucle for range avec maps
+m := map[string]int{"a": 1, "b": 2, "c": 3}
+
+// Parcours clé-valeur
+for clé, valeur := range m {
+    fmt.Printf("%s: %d\n", clé, valeur)
+}
+
+// Parcours clés seulement
+for clé := range m {
+    fmt.Printf("Clé: %s\n", clé)
+}
+
+// Parcours valeurs seulement (rare)
+for _, valeur := range m {
+    fmt.Printf("Valeur: %d\n", valeur)
+}
+
+### 5.7 Boucle infinie
+for {
+    fmt.Println("loop")
+    break  // Sort de la boucle
+}
+
+### 5.8 Mots-clés de contrôle
+- break    : Sort complètement de la boucle
+- continue : Passe à l'itération suivante
+
+### Exemple avec continue
+for n := range 6 {
+    if n%2 == 0 {  // Si n est pair
+        continue   // Passe à l'itération suivante
+    }
+    fmt.Println(n) // Affiche seulement les impairs
+}
+// Sortie: 1, 3, 5
+
+### Opérateur modulo %
+- n % 2 : reste de la division de n par 2
+- Si reste = 0 → nombre pair
+- Si reste = 1 → nombre impair
+
+## 6. FONCTIONS
+
+### 6.1 Fonction main()
+- Point d'entrée obligatoire du programme
+- Pas de paramètres : func main()
+- Pas de valeur de retour
+- Le programme commence et se termine avec main()
+
+### 6.2 Déclaration de fonctions
+func nomFonction(paramètres) typeRetour {
+    // corps de la fonction
+    return valeur
+}
+
+### 6.3 Fonctions avec paramètres
+func add(num1 int, num2 int) int {
+    return num1 + num2
+}
+
+### Syntaxe courte pour paramètres du même type
+func plusadd(num1, num2, num3 int) int {
+    return num1 + num2 + num3
+}
+
+### 6.4 Fonctions avec retours multiples
+func vals() (int, int) {
+    return 3, 7
+}
+
+### Utilisation des retours multiples
+a, b := vals()              // Récupère les deux valeurs
+fmt.Println(a)              // 3
+fmt.Println(b)              // 7
+
+### Ignorer une valeur avec _
+_, c := vals()              // Ignore la première valeur
+fmt.Println(c)              // 7
+
+### 6.5 Fonctions variadiques
+func sum(nums ...int) {
+    total := 0
+    for _, num := range nums {
+        total += num
+    }
+    fmt.Println(total)
+}
+
+### Appel de fonctions variadiques
+sum(1, 2)                   // 2 arguments
+sum(1, 2, 3)               // 3 arguments
+sum(1, 2, 3, 4, 5)         // 5 arguments
+
+### Expansion d'une slice avec ...
+nums := []int{1, 2, 3, 4}
+sum(nums...)               // Équivalent à sum(1, 2, 3, 4)
+
+### 6.6 Caractéristiques des fonctions variadiques
+- SYNTAXE : func nom(param ...type)
+- FLEXIBILITÉ : Nombre variable d'arguments
+- CONVERSION : Le paramètre devient une slice []type
+- POSITION : Doit être le dernier paramètre
+- UNICITÉ : Une seule fonction variadique par fonction
+
+### 6.7 Exemples de fonctions variadiques courantes
+fmt.Println("a", "b", "c")           // Affichage multiple
+fmt.Printf("%s %s", "hello", "world") // Formatage
+append(slice, elem1, elem2, elem3)    // Ajout multiple
+
+### 6.8 Fonctions avec paramètres mixtes
+func greet(greeting string, names ...string) {
+    for _, name := range names {
+        fmt.Printf("%s %s!\n", greeting, name)
+    }
+}
+
+greet("Hello", "Alice", "Bob")       // Hello Alice! Hello Bob!
+
+### 6.9 Fonctions anonymes
+variable := func(paramètres) typeRetour {
+    // corps de la fonction
+    return valeur
+}
+
+### Exemple de fonction avec retour
+func Now() time.Time {
+    return time.Now()
+}
+
+### 6.10 CLOSURES (FERMETURES) EN GO
+
+### Qu'est-ce qu'une closure ?
+Une closure est une fonction qui :
+- Est définie à l'intérieur d'une autre fonction
+- CAPTURE et mémorise les variables de son environnement
+- Peut accéder et modifier ces variables même après la fin de la fonction parente
+
+### 6.10.1 Exemple basique de closure
+
+### Générateur de séquence
+func intSeq() func() int {
+    i := 0                    // Variable capturée
+    return func() int {       // Fonction anonyme (closure)
+        i++                   // Accède à la variable 'i' capturée
+        return i
+    }
+}
+
+### Utilisation
+nextInt := intSeq()           // Crée une closure
+fmt.Println(nextInt())        // 1
+fmt.Println(nextInt())        // 2
+fmt.Println(nextInt())        // 3
+
+### 6.10.2 Indépendance des closures
+newInts := intSeq()           // Nouvelle closure indépendante
+fmt.Println(newInts())        // 1 (nouvelle variable i)
+fmt.Println(newInts())        // 2
+
+### 6.10.3 Closure avec paramètres
+
+### Multiplicateur configuré
+func makeMultiplier(factor int) func(int) int {
+    return func(x int) int {
+        return x * factor     // 'factor' est capturé
+    }
+}
+
+double := makeMultiplier(2)   // Closure avec factor=2
+triple := makeMultiplier(3)   // Closure avec factor=3
+fmt.Println(double(5))        // 10
+fmt.Println(triple(5))        // 15
+
+### 6.10.4 Accumulateur avec closure
+func makeAccumulator() func(int) int {
+    sum := 0                  // État persistant
+    return func(value int) int {
+        sum += value          // Modification de l'état
+        return sum
+    }
+}
+
+acc := makeAccumulator()
+fmt.Println(acc(1))           // 1
+fmt.Println(acc(2))           // 3
+fmt.Println(acc(3))           // 6
+
+### 6.10.5 Concepts clés des closures
+
+### Capture de variables
+- La closure "se souvient" des variables de son environnement
+- Les variables restent vivantes tant que la closure existe
+
+### État persistant
+- Chaque closure maintient son propre état
+- Les variables capturées conservent leurs valeurs entre les appels
+
+### Encapsulation
+- Les variables capturées ne sont accessibles que via la closure
+- Impossible d'accéder directement aux variables depuis l'extérieur
+
+### Indépendance
+- Chaque appel à la fonction génératrice crée une nouvelle closure
+- Chaque closure a ses propres variables capturées
+
+### 6.10.6 Avantages des closures
+
+### Encapsulation des données
+- Données privées et protégées
+- Seule la closure peut les modifier
+
+### Alternative aux variables globales
+- État persistant sans pollution globale
+- Chaque instance maintient son propre état
+
+### Flexibilité et réutilisabilité
+- Permet de créer des fonctions spécialisées
+- Pattern de programmation fonctionnelle
+
+### Code concis
+- Plus simple que les structures avec méthodes
+- Interface claire et intuitive
+
+### 6.10.7 Cas d'usage courants
+
+### Générateurs
+func makeRange(start, end int) func() (int, bool) {
+    current := start
+    return func() (int, bool) {
+        if current >= end {
+            return 0, false
+        }
+        val := current
+        current++
+        return val, true
+    }
+}
+
+### Configuration de fonctions
+func makeValidator(minLength int) func(string) bool {
+    return func(input string) bool {
+        return len(input) >= minLength
+    }
+}
+
+### Cache/Mémoisation
+func memoize(fn func(int) int) func(int) int {
+    cache := make(map[int]int)
+    return func(x int) int {
+        if val, ok := cache[x]; ok {
+            return val
+        }
+        result := fn(x)
+        cache[x] = result
+        return result
+    }
+}
+
+### Middleware et wrappers
+func timeFunction(fn func()) func() {
+    return func() {
+        start := time.Now()
+        fn()
+        fmt.Printf("Durée: %v\n", time.Since(start))
+    }
+}
+
+### 6.10.8 Bonnes pratiques avec les closures
+
+### Éviter les fuites mémoire
+- Attention aux références circulaires
+- Libérer les closures non utilisées
+
+### Limiter la portée des captures
+- Ne capturer que les variables nécessaires
+- Éviter de capturer de gros objets
+
+### Documentation claire
+- Documenter le comportement des closures
+- Expliquer l'état capturé et son cycle de vie
+
+### Tests appropriés
+- Tester l'indépendance des closures
+- Vérifier la persistance de l'état
+
+### 6.11 RÉCURSION EN GO
+
+### Qu'est-ce que la récursion ?
+La récursion est une technique où une fonction S'APPELLE ELLE-MÊME pour résoudre un problème en le décomposant en sous-problèmes plus petits.
+
+### 6.11.1 Structure d'une fonction récursive
+
+### Éléments obligatoires
+func recursive(parameter) returnType {
+    // CAS DE BASE (condition d'arrêt)
+    if baseCondition {
+        return baseValue
+    }
+    
+    // APPEL RÉCURSIF (avec paramètre modifié)
+    return operation(recursive(modifiedParameter))
+}
+
+### 6.11.2 Exemple : Factorielle
+
+### Implémentation récursive
+func fact(n int) int {
+    if n == 0 {           // CAS DE BASE
+        return 1
+    }
+    return n * fact(n-1)  // APPEL RÉCURSIF
+}
+
+### Exécution étape par étape pour fact(4)
+fact(4) → 4 * fact(3)
+        → 4 * (3 * fact(2))
+        → 4 * (3 * (2 * fact(1)))
+        → 4 * (3 * (2 * (1 * fact(0))))
+        → 4 * (3 * (2 * (1 * 1)))
+        → 4 * (3 * (2 * 1))
+        → 4 * (3 * 2)
+        → 4 * 6
+        → 24
+
+### 6.11.3 Fibonacci avec variables fonctions
+
+### Déclaration de variable fonction
+var fib func(n int) int             // Variable de type fonction
+
+### Assignation de fonction anonyme
+fib = func(n int) int {
+    if n < 2 {
+        return n                    // fib(0)=0, fib(1)=1
+    }
+    return fib(n-1) + fib(n-2)     // Récursion double
+}
+
+### Suite de Fibonacci
+fib(0) = 0
+fib(1) = 1
+fib(2) = 1
+fib(3) = 2
+fib(4) = 3
+fib(5) = 5
+fib(6) = 8
+fib(7) = 13
+
+### 6.11.4 Types de récursion
+
+### Récursion simple (factorielle)
+func fact(n int) int {
+    return n * fact(n-1)            // Un seul appel récursif
+}
+
+### Récursion double (Fibonacci)
+func fib(n int) int {
+    return fib(n-1) + fib(n-2)     // Deux appels récursifs
+}
+
+### Récursion terminale (optimisée)
+func factTail(n, acc int) int {
+    if n == 0 {
+        return acc
+    }
+    return factTail(n-1, n*acc)     // Appel terminal
+}
+
+### 6.11.5 Fonctions comme valeurs (première classe)
+
+### Déclaration de variable fonction
+var operation func(int, int) int
+
+### Assignation de fonction
+operation = func(a, b int) int { return a + b }
+result := operation(5, 3)           // 8
+
+### Réassignation
+operation = func(a, b int) int { return a * b }
+result = operation(5, 3)            // 15
+
+### Passage de fonctions en paramètre
+func apply(fn func(int) int, value int) int {
+    return fn(value)
+}
+
+square := func(x int) int { return x * x }
+result := apply(square, 5)          // 25
+
+### 6.11.6 Exemples pratiques de récursion
+
+### Puissance
+func power(base, exp int) int {
+    if exp == 0 {
+        return 1
+    }
+    return base * power(base, exp-1)
+}
+
+### Somme des entiers
+func sum(n int) int {
+    if n <= 0 {
+        return 0
+    }
+    return n + sum(n-1)
+}
+
+### Compter les chiffres
+func countDigits(n int) int {
+    if n < 10 {
+        return 1
+    }
+    return 1 + countDigits(n/10)
+}
+
+### Inversion de chaîne
+func reverse(s string) string {
+    if len(s) <= 1 {
+        return s
+    }
+    return reverse(s[1:]) + string(s[0])
+}
+
+### 6.11.7 Récursion vs Itération
+
+### Version récursive (Fibonacci)
+func fibRecursive(n int) int {
+    if n < 2 { return n }
+    return fibRecursive(n-1) + fibRecursive(n-2)
+}
+
+### Version itérative (plus efficace)
+func fibIterative(n int) int {
+    if n < 2 { return n }
+    a, b := 0, 1
+    for i := 2; i <= n; i++ {
+        a, b = b, a+b
+    }
+    return b
+}
+
+### 6.11.8 Optimisation : Mémoisation
+
+### Fibonacci avec cache
+func fibMemo() func(int) int {
+    cache := make(map[int]int)
+    
+    var fib func(int) int
+    fib = func(n int) int {
+        if n < 2 { return n }
+        if val, ok := cache[n]; ok {
+            return val              // Valeur en cache
+        }
+        result := fib(n-1) + fib(n-2)
+        cache[n] = result           // Mise en cache
+        return result
+    }
+    return fib
+}
+
+### Utilisation
+fibFunc := fibMemo()
+fmt.Println(fibFunc(40))            // Beaucoup plus rapide
+
+### 6.11.9 Problèmes de performance
+
+### Récursion simple : Complexité linéaire
+fact(n) : O(n) temps, O(n) espace
+
+### Récursion double : Complexité exponentielle
+fib(n) : O(2^n) temps - TRÈS LENT pour n > 30
+
+### Solutions d'optimisation
+- Mémoisation : Cache des résultats
+- Récursion terminale : Optimisation du compilateur
+- Version itérative : Évite la pile d'appels
+
+### 6.11.10 Bonnes pratiques
+
+### Toujours définir un cas de base
+func badRecursive(n int) int {
+    return n + badRecursive(n-1)    // ❌ Récursion infinie !
+}
+
+func goodRecursive(n int) int {
+    if n <= 0 { return 0 }          // ✅ Cas de base
+    return n + goodRecursive(n-1)
+}
+
+### Vérifier la progression
+- Chaque appel doit se rapprocher du cas de base
+- Éviter les paramètres qui ne changent pas
+
+### Considérer les alternatives
+- Récursion pour les problèmes naturellement récursifs
+- Itération pour les problèmes simples (performance)
+- Mémoisation pour éviter les recalculs
+
+### Limites de la pile
+- Go a une pile limitée (~1MB par défaut)
+- Récursion profonde peut causer stack overflow
+- Utiliser la récursion terminale ou l'itération si nécessaire
+
+### 6.11.11 Avantages et inconvénients
+
+### Avantages de la récursion
+- Code élégant et expressif
+- Naturelle pour certains problèmes (arbres, fractales)
+- Correspond aux définitions mathématiques
+- Facilite la preuve de correction
+
+### Inconvénients
+- Performance généralement plus lente
+- Utilisation importante de mémoire (pile)
+- Risque de débordement de pile
+- Plus difficile à déboguer
+
+### Quand utiliser la récursion ?
+- Problèmes avec structure récursive naturelle
+- Algorithmes de parcours d'arbres
+- Algorithmes de recherche (backtracking)
+- Problèmes mathématiques (combinatoire)
+- Quand la lisibilité prime sur la performance
+
+## 7. STRUCTURES (STRUCTS) EN GO
+
+### Qu'est-ce qu'une structure ?
+Une structure (`struct`) est un TYPE DE DONNÉES PERSONNALISÉ qui groupe plusieurs champs de différents types sous un même nom. C'est l'équivalent des classes dans d'autres langages, mais sans héritage.
+
+### 7.1 Définition d'une structure
+
+### Syntaxe de base
+type NomStructure struct {
+    champ1 type1
+    champ2 type2
+    champ3 type3
+}
+
+### Exemple concret
+type person struct {
+    name string
+    age  int
+}
+
+### Caractéristiques des structures
+- GROUPEMENT LOGIQUE : Organise les données liées
+- TYPE SÉCURISÉ : Chaque structure est un type distinct
+- COMPOSITION : Go favorise la composition à l'héritage
+- MÉMOIRE EFFICACE : Champs stockés de manière contiguë
+
+### 7.2 Création et initialisation
+
+### Initialisation par position
+p1 := person{"Alice", 25}           // Ordre des champs important
+
+### Initialisation avec noms de champs (recommandé)
+p2 := person{name: "Bob", age: 30}  // Ordre libre, plus explicite
+
+### Initialisation partielle
+p3 := person{name: "Charlie"}       // age = 0 (valeur zéro)
+
+### Déclaration puis assignation
+var p4 person
+p4.name = "Diana"
+p4.age = 28
+
+### 7.3 Accès aux champs - Notation pointée
+
+### Lecture des champs
+nom := p2.name                      // "Bob"
+age := p2.age                       // 30
+
+### Modification des champs
+p2.name = "Robert"                  // Modification du nom
+p2.age = 31                         // Modification de l'âge
+
+### Syntaxe p.champ
+- p : Variable contenant la structure
+- . : Opérateur d'accès aux champs
+- champ : Nom du champ à accéder
+
+### 7.4 Pointeurs vers structures
+
+### Création d'un pointeur
+p := person{name: "Eve", age: 35}
+sp := &p                            // sp pointe vers p
+
+### Accès via pointeur (déréférencement automatique)
+fmt.Println(sp.age)                 // Go simplifie automatiquement
+sp.age = 36                         // Modification via pointeur
+
+### Équivalence (mais Go préfère la première)
+sp.age = 36                         // Syntaxe simplifiée
+(*sp).age = 36                      // Syntaxe complète
+
+### 7.5 Fonctions constructeurs
+
+### Pattern de constructeur simple
+func newPerson(name string) *person {
+    p := person{name: name}
+    p.age = 42                      // Valeur par défaut
+    return &p                       // Retourne l'adresse
+}
+
+### Utilisation
+alice := newPerson("Alice")         // alice est de type *person
+
+### Avantages des constructeurs
+- INITIALISATION COHÉRENTE : Garantit la cohérence des données
+- LOGIQUE CENTRALISÉE : Un seul endroit pour la création
+- VALEURS PAR DÉFAUT : Définit des valeurs standard
+- VALIDATION : Peut inclure des vérifications
+
+### Constructeur avec validation
+func newValidPerson(name string, age int) (*person, error) {
+    if name == "" {
+        return nil, fmt.Errorf("nom requis")
+    }
+    if age < 0 {
+        return nil, fmt.Errorf("âge invalide")
+    }
+    return &person{name: name, age: age}, nil
+}
+
+### 7.6 Structures anonymes
+
+### Définition et utilisation immédiate
+dog := struct {
+    name   string
+    isGood bool
+}{
+    "Rex",
+    true,
+}
+
+### Cas d'usage
+- Données temporaires
+- Configuration spécifique
+- Tests unitaires
+- Pas de réutilisation nécessaire
+
+### 7.7 Valeurs zéro des structures
+
+### Valeurs par défaut selon le type
+type config struct {
+    host    string  // ""
+    port    int     // 0
+    enabled bool    // false
+    timeout *int    // nil
+}
+
+var cfg config                      // Tous les champs ont leur valeur zéro
+
+### 7.8 Comparaison de structures
+
+### Structures comparables
+type point struct {
+    x, y int
+}
+
+p1 := point{1, 2}
+p2 := point{1, 2}
+fmt.Println(p1 == p2)               // true (même valeurs)
+
+### Structures non comparables (avec slices, maps, fonctions)
+type container struct {
+    data []int                      // Slice : non comparable
+}
+
+### 7.9 Composition de structures
+
+### Embedding (composition)
+type address struct {
+    street string
+    city   string
+}
+
+type employee struct {
+    name    string
+    age     int
+    address address                 // Composition
+}
+
+### Utilisation
+emp := employee{
+    name: "John",
+    age:  30,
+    address: address{
+        street: "123 Main St",
+        city:   "Paris",
+    },
+}
+fmt.Println(emp.address.city)       // "Paris"
+
+### 7.10 Méthodes sur structures (aperçu)
+
+### Définition d'une méthode
+func (p person) sePresenter() {
+    fmt.Printf("Je suis %s, %d ans\n", p.name, p.age)
+}
+
+### Utilisation
+alice := person{name: "Alice", age: 25}
+alice.sePresenter()                 // "Je suis Alice, 25 ans"
+
+## 7.14 MÉTHODES EN GO - CONCEPTS AVANCÉS
+
+### Qu'est-ce qu'une méthode ?
+Une MÉTHODE est une fonction attachée à un type spécifique. Elle permet d'associer des comportements aux structures, créant ainsi une approche orientée objet en Go.
+
+### 7.14.1 Syntaxe des méthodes
+
+### Anatomie d'une méthode
+func (receiver type) nomMethode(paramètres) typeRetour {
+    // corps de la méthode
+}
+
+### Exemple concret
+type rect struct {
+    width, height int
+}
+
+func (r rect) area() int {
+    return r.width * r.height
+}
+
+### Éléments clés
+- RECEIVER : (r rect) - la structure qui "reçoit" la méthode
+- ACCÈS AUX CHAMPS : r.width, r.height via le receiver
+- SYNTAXE D'APPEL : rectangle.area()
+
+### 7.14.2 Le receiver (récepteur)
+
+### Receiver par valeur
+func (r rect) area() int {           // r est une COPIE
+    return r.width * r.height        // Lecture seulement
+}
+
+### Receiver par pointeur
+func (r *rect) doubleSize() {        // r est un POINTEUR
+    r.width *= 2                     // Modification de l'original
+    r.height *= 2
+}
+
+### Conventions de nommage
+- Utilisez la première lettre du type : (r rect), (u user)
+- Évitez "this", "self" ou des noms longs
+- Soyez cohérent dans tout le code
+
+### 7.14.3 Quand utiliser valeur vs pointeur
+
+### Receiver par valeur - Utilisez quand :
+- Lecture seulement des champs
+- Structure petite (quelques champs simples)
+- Pas de modification nécessaire
+- Types de base (int, string, bool)
+
+### Receiver par pointeur - Utilisez quand :
+- Modification des champs nécessaire
+- Structure volumineuse (éviter la copie)
+- Cohérence avec d'autres méthodes
+- Performance critique
+
+### 7.14.4 Exemples pratiques de méthodes
+
+### Méthodes de calcul
+func (r rect) area() int {
+    return r.width * r.height
+}
+
+func (r rect) perimeter() int {
+    return 2*r.width + 2*r.height
+}
+
+func (r rect) isSquare() bool {
+    return r.width == r.height
+}
+
+### Méthodes de modification
+func (r *rect) resize(factor float64) {
+    r.width = int(float64(r.width) * factor)
+    r.height = int(float64(r.height) * factor)
+}
+
+func (r *rect) setDimensions(width, height int) {
+    r.width = width
+    r.height = height
+}
+
+### Méthodes de validation
+func (r rect) isValid() bool {
+    return r.width > 0 && r.height > 0
+}
+
+func (r rect) hasValidRatio() bool {
+    if r.height == 0 {
+        return false
+    }
+    ratio := float64(r.width) / float64(r.height)
+    return ratio >= 0.1 && ratio <= 10.0
+}
+
+### 7.14.5 Appel de méthodes
+
+### Sur valeur directe
+r := rect{width: 10, height: 5}
+fmt.Println(r.area())                // 50
+fmt.Println(r.perimeter())           // 30
+
+### Sur pointeur (déréférencement automatique)
+rp := &rect{width: 10, height: 5}
+fmt.Println(rp.area())               // 50 - Go fait rp.area() → (*rp).area()
+rp.resize(2.0)                       // Modification via pointeur
+
+### Conversion automatique de Go
+r := rect{width: 10, height: 5}
+r.resize(2.0)                        // Go fait (&r).resize(2.0) automatiquement
+
+### 7.14.6 Méthodes vs Fonctions
+
+### Approche avec fonctions
+func area(r rect) int {
+    return r.width * r.height
+}
+func perimeter(r rect) int {
+    return 2*r.width + 2*r.height
+}
+// Utilisation : area(rectangle), perimeter(rectangle)
+
+### Approche avec méthodes (préférée)
+func (r rect) area() int { ... }
+func (r rect) perimeter() int { ... }
+// Utilisation : rectangle.area(), rectangle.perimeter()
+
+### Avantages des méthodes
+- LISIBILITÉ : Plus naturel et expressif
+- ORGANISATION : Comportements liés aux données
+- ENCAPSULATION : Logique attachée au type
+- INTERFACES : Base pour le polymorphisme
+
+### 7.14.7 Méthodes spéciales
+
+### Méthode String() - Affichage personnalisé
+func (r rect) String() string {
+    return fmt.Sprintf("Rectangle(%dx%d)", r.width, r.height)
+}
+
+// Go appelle automatiquement String() dans fmt.Println
+r := rect{width: 10, height: 5}
+fmt.Println(r)                       // Rectangle(10x5)
+
+### Méthodes de comparaison
+func (r rect) equals(other rect) bool {
+    return r.width == other.width && r.height == other.height
+}
+
+func (r rect) isLargerThan(other rect) bool {
+    return r.area() > other.area()
+}
+
+### 7.14.8 Chaînage de méthodes
+
+### Méthodes qui retournent le receiver
+func (r *rect) setWidth(width int) *rect {
+    r.width = width
+    return r
+}
+
+func (r *rect) setHeight(height int) *rect {
+    r.height = height
+    return r
+}
+
+### Utilisation en chaîne
+r := &rect{}
+r.setWidth(10).setHeight(5)
+fmt.Println(r.area())                // 50
+
+### 7.14.9 Méthodes et interfaces
+
+### Interface définie par les méthodes
+type Shape interface {
+    area() int
+    perimeter() int
+}
+
+// rect implémente automatiquement Shape
+var s Shape = rect{width: 10, height: 5}
+fmt.Println(s.area())                // 50
+
+### Polymorphisme avec interfaces
+shapes := []Shape{
+    rect{width: 10, height: 5},
+    circle{radius: 7},
+}
+
+for _, shape := range shapes {
+    fmt.Println("Area:", shape.area())
+}
+
+### 7.14.10 Exemples concrets d'utilisation
+
+### Utilisation basique
+r := rect{width: 10, height: 5}
+fmt.Println("Area:", r.area())       // Area: 50
+fmt.Println("Perimeter:", r.perimeter()) // Perimeter: 30
+fmt.Println("Is square:", r.isSquare())  // Is square: false
+
+### Avec pointeur pour modification
+rp := &rect{width: 10, height: 5}
+rp.resize(2.0)                       // Doubler la taille
+fmt.Println("New area:", rp.area())  // New area: 200
+
+### Validation et conditions
+if r.isValid() && !r.isSquare() {
+    fmt.Println("Rectangle valide non carré")
+}
+
+### 7.14.11 Sortie du programme methods.go
+rect{width: 10, height: 5}          // Affichage de la structure
+area 50                              // 10 * 5
+perim 30                             // 2 * (10 + 5)
+area: 50                             // Via pointeur (même résultat)
+perim: 30                            // Via pointeur (même résultat)
+
+### 7.14.12 Bonnes pratiques avec les méthodes
+
+### Conception
+- Une méthode = une responsabilité claire
+- Noms descriptifs et cohérents
+- Groupez les méthodes logiquement liées
+
+### Performance
+- Receiver par valeur pour lecture
+- Receiver par pointeur pour modification
+- Évitez les copies inutiles de grandes structures
+
+### Cohérence
+- Soyez cohérent dans le choix valeur/pointeur
+- Utilisez les mêmes conventions de nommage
+- Documentez les méthodes complexes
+
+### Validation
+- Validez les paramètres dans les méthodes
+- Gérez les cas d'erreur appropriés
+- Retournez des erreurs explicites si nécessaire
+
+## 7.15 INTERFACES EN GO - POLYMORPHISME ET CONTRATS
+
+### Qu'est-ce qu'une interface ?
+Une INTERFACE en Go définit un CONTRAT - un ensemble de méthodes qu'un type doit implémenter. C'est le mécanisme de polymorphisme de Go qui permet d'écrire du code flexible et réutilisable.
+
+### 7.15.1 Définition d'une interface
+
+### Syntaxe générale
+type nomInterface interface {
+    methode1() typeRetour1
+    methode2(paramètres) typeRetour2
+    methode3()
+}
+
+### Exemple concret
+type geometry interface {
+    area() float64
+    perim() float64
+}
+
+### Caractéristiques des interfaces
+- CONTRAT : Définit "QUOI" faire, pas "COMMENT"
+- IMPLICITE : Pas besoin de déclarer "implements"
+- POLYMORPHISME : Même interface, comportements différents
+- COMPOSITION : Peut inclure d'autres interfaces
+
+### 7.15.2 Implémentation implicite
+
+### Structure rect implémentant geometry
+type rect struct {
+    width, height float64
+}
+
+func (r rect) area() float64 {
+    return r.width * r.height
+}
+
+func (r rect) perim() float64 {
+    return 2*r.width + 2*r.height
+}
+
+### Structure circle implémentant geometry
+type circle struct {
+    radius float64
+}
+
+func (c circle) area() float64 {
+    return math.Pi * c.radius * c.radius
+}
+
+func (c circle) perim() float64 {
+    return 2 * math.Pi * c.radius
+}
+
+### Point clé
+- AUTOMATIQUE : rect et circle implémentent geometry automatiquement
+- CRITÈRE : Avoir toutes les méthodes requises par l'interface
+- VÉRIFICATION : Faite à la compilation
+
+### 7.15.3 Polymorphisme en action
+
+### Fonction polymorphe
+func measure(g geometry) {
+    fmt.Println(g)           // Affiche la structure
+    fmt.Println(g.area())    // Appelle area() du type concret
+    fmt.Println(g.perim())   // Appelle perim() du type concret
+}
+
+### Utilisation avec différents types
+r := rect{width: 3, height: 4}
+c := circle{radius: 5}
+
+measure(r)  // Fonctionne avec rect
+measure(c)  // Fonctionne avec circle
+
+### Avantage
+- MÊME FONCTION : measure() fonctionne avec tous les types geometry
+- FLEXIBILITÉ : Ajouter de nouveaux types sans modifier measure()
+- DÉCOUPLAGE : Code indépendant des implémentations concrètes
+
+### 7.15.4 Type Assertion - Récupération du type concret
+
+### Syntaxe de base
+valeur, ok := interface.(TypeConcret)
+
+### Exemple pratique
+func detectCircle(g geometry) {
+    if c, ok := g.(circle); ok {
+        fmt.Println("circle with radius", c.radius)
+    }
+}
+
+### Décomposition
+- g.(circle) : Tente de convertir g en circle
+- c : Variable recevant le circle si conversion réussie
+- ok : Booléen indiquant le succès de la conversion
+- if c, ok := ... : Pattern sécurisé pour vérifier le type
+
+### Utilisation
+detectCircle(r)  // r est rect → rien ne s'affiche
+detectCircle(c)  // c est circle → "circle with radius 5"
+
+### 7.15.5 Type Switch - Gestion de plusieurs types
+
+### Syntaxe du type switch
+func classifyShape(g geometry) {
+    switch s := g.(type) {
+    case rect:
+        fmt.Printf("Rectangle %.1fx%.1f\n", s.width, s.height)
+    case circle:
+        fmt.Printf("Circle radius %.1f\n", s.radius)
+    default:
+        fmt.Println("Unknown shape")
+    }
+}
+
+### Avantages
+- MULTIPLE TYPES : Gère plusieurs types en une fois
+- VARIABLE TYPÉE : s est du bon type dans chaque case
+- SÉCURISÉ : default gère les types non prévus
+
+### 7.15.6 Interface vide et type any
+
+### Interface vide (accepte tout)
+func printAnything(v interface{}) {
+    fmt.Println(v)
+}
+
+### Go 1.18+ : type any
+func printAnything(v any) {  // any = interface{}
+    fmt.Println(v)
+}
+
+### Utilisation
+printAnything(42)        // int
+printAnything("hello")   // string
+printAnything(rect{})    // struct
+
+### 7.15.7 Composition d'interfaces
+
+### Interfaces simples
+type Reader interface {
+    Read([]byte) (int, error)
+}
+
+type Writer interface {
+    Write([]byte) (int, error)
+}
+
+### Interface composée
+type ReadWriter interface {
+    Reader    // Inclusion d'interface
+    Writer    // Composition
+}
+
+### Avantage
+- RÉUTILISATION : Combine des interfaces existantes
+- MODULARITÉ : Petites interfaces composables
+- FLEXIBILITÉ : Types peuvent implémenter partiellement
+
+### 7.15.8 Interfaces dans la bibliothèque standard
+
+### fmt.Stringer - Affichage personnalisé
+type Stringer interface {
+    String() string
+}
+
+func (r rect) String() string {
+    return fmt.Sprintf("Rectangle(%.1fx%.1f)", r.width, r.height)
+}
+// fmt.Println appelle automatiquement String()
+
+### sort.Interface - Tri personnalisé
+type Interface interface {
+    Len() int
+    Less(i, j int) bool
+    Swap(i, j int)
+}
+
+### io.Reader/Writer - E/S
+type Reader interface {
+    Read([]byte) (int, error)
+}
+
+### 7.15.9 Exemples pratiques étendus
+
+### Interface pour animaux
+type Animal interface {
+    makeSound() string
+    move() string
+}
+
+type Dog struct{ name string }
+type Bird struct{ species string }
+
+func (d Dog) makeSound() string { return "Woof!" }
+func (d Dog) move() string { return "Running" }
+
+func (b Bird) makeSound() string { return "Tweet!" }
+func (b Bird) move() string { return "Flying" }
+
+func describe(a Animal) {
+    fmt.Printf("Sound: %s, Movement: %s\n", a.makeSound(), a.move())
+}
+
+### Collection polymorphe
+animals := []Animal{
+    Dog{name: "Rex"},
+    Bird{species: "Sparrow"},
+}
+
+for _, animal := range animals {
+    describe(animal)
+}
+
+### 7.15.10 Gestion d'erreurs avec assertion
+
+### Assertion sécurisée avec gestion d'erreur
+func getRadius(g geometry) (float64, error) {
+    if c, ok := g.(circle); ok {
+        return c.radius, nil
+    }
+    return 0, fmt.Errorf("not a circle")
+}
+
+### Utilisation
+if radius, err := getRadius(c); err == nil {
+    fmt.Printf("Radius: %.2f\n", radius)
+} else {
+    fmt.Println("Error:", err)
+}
+
+### 7.15.11 Patterns avancés
+
+### Interface avec validation
+type Validator interface {
+    Validate() error
+}
+
+func processIfValid(v Validator) error {
+    if err := v.Validate(); err != nil {
+        return fmt.Errorf("validation failed: %w", err)
+    }
+    // Traitement...
+    return nil
+}
+
+### Interface pour configuration
+type Configurable interface {
+    Configure(map[string]interface{}) error
+    GetConfig() map[string]interface{}
+}
+
+### Interface pour sérialisation
+type Serializable interface {
+    Marshal() ([]byte, error)
+    Unmarshal([]byte) error
+}
+
+### 7.15.12 Sortie du programme interfaces.go
+{3 4}                           // rect{width: 3, height: 4}
+12                              // area: 3 * 4 = 12
+14                              // perim: 2*(3+4) = 14
+{5}                             // circle{radius: 5}
+78.53981633974483              // area: π * 5² ≈ 78.54
+31.41592653589793              // perim: 2 * π * 5 ≈ 31.42
+                               // detectCircle(r) → rien (pas circle)
+circle with radius 5           // detectCircle(c) → c est circle !
+
+### 7.15.13 Performance et considérations
+
+### Overhead des interfaces
+- INDIRECTION : Appel via table de méthodes
+- ALLOCATION : Peut causer des allocations heap
+- OPTIMISATION : Compiler optimise certains cas
+
+### Quand utiliser les interfaces
+- POLYMORPHISME : Traitement uniforme de types différents
+- TESTABILITÉ : Mocking et tests unitaires
+- DÉCOUPLAGE : Séparation des préoccupations
+- EXTENSIBILITÉ : Facilite l'ajout de nouveaux types
+
+### Quand éviter
+- PERFORMANCE CRITIQUE : Utilisez types concrets
+- SIMPLE USAGE : Pas besoin si un seul type
+- OVER-ENGINEERING : N'ajoutez pas de complexité inutile
+
+### 7.15.14 Bonnes pratiques avec les interfaces
+
+### Design d'interfaces
+- PETITES INTERFACES : 1-3 méthodes maximum
+- NOMS DESCRIPTIFS : Reader, Writer, Stringer
+- SUFFIX -ER : Convention pour les interfaces
+- DÉFINITION AU BESOIN : Là où elles sont utilisées
+
+### Utilisation
+- ACCEPTER INTERFACES : Dans les paramètres de fonctions
+- RETOURNER TYPES CONCRETS : En général
+- COMPOSITION : Combiner petites interfaces
+- VALIDATION : Vérifier les types avec assertion
+
+### Éviter
+- INTERFACES TROP LARGES : Difficiles à implémenter
+- HIÉRARCHIES COMPLEXES : Go privilégie la simplicité
+- INTERFACES INUTILES : N'ajoutez que si nécessaire
+
+### 7.11 Exemples pratiques
+
+### Exemple 1 : Gestion d'utilisateurs
+type user struct {
+    id       int
+    username string
+    email    string
+    active   bool
+}
+
+func newUser(username, email string) *user {
+    return &user{
+        id:       generateID(),
+        username: username,
+        email:    email,
+        active:   true,
+    }
+}
+
+### Exemple 2 : Configuration
+type config struct {
+    host     string
+    port     int
+    database string
+    timeout  int
+}
+
+func defaultConfig() config {
+    return config{
+        host:     "localhost",
+        port:     8080,
+        database: "myapp",
+        timeout:  30,
+    }
+}
+
+### Exemple 3 : Coordonnées
+type point struct {
+    x, y float64
+}
+
+func (p point) distance(other point) float64 {
+    dx := p.x - other.x
+    dy := p.y - other.y
+    return math.Sqrt(dx*dx + dy*dy)
+}
+
+### 7.12 Sécurité mémoire avec Go
+
+### Retour de pointeur sécurisé
+func createPerson() *person {
+    p := person{name: "Local", age: 20}
+    return &p                       // ✅ Sécurisé en Go !
+}
+
+### Gestion automatique par Go
+- ANALYSE D'ÉCHAPPEMENT : Go détecte si p est retournée
+- ALLOCATION HEAP : p est allouée sur le tas automatiquement
+- GARBAGE COLLECTION : Libération automatique quand inutilisée
+
+### 7.13 Bonnes pratiques avec les structures
+
+### Nommage
+- Utilisez CamelCase pour les noms de structures
+- Première lettre majuscule pour export public
+- Première lettre minuscule pour usage interne
+
+### Initialisation
+- Préférez l'initialisation avec noms de champs
+- Utilisez des constructeurs pour la logique complexe
+- Validez les données dans les constructeurs
+
+### Conception
+- Gardez les structures simples et cohérentes
+- Utilisez la composition plutôt que l'héritage
+- Groupez les données logiquement liées
+
+### Performance
+- Retournez des pointeurs pour les grandes structures
+- Évitez la copie inutile de structures volumineuses
+- Utilisez l'embedding pour éviter l'indirection
+
+### 7.16 ÉNUMÉRATIONS (ENUMS) EN GO
+
+### 7.16.1 Caractéristiques des énumérations en Go
+
+### Go n'a pas d'enums natifs MAIS on les simule avec :
+- TYPE PERSONNALISÉ basé sur un type de base (int, string)
+- CONSTANTES avec iota pour la génération automatique
+- MÉTHODES pour ajouter des comportements
+- INTERFACE Stringer pour l'affichage
+
+### 7.16.2 Syntaxe de base avec iota
+
+### Déclaration d'un type enum
+type ServerState int
+
+### Déclaration des constantes avec iota
+const (
+    StateIdle ServerState = iota    // 0
+    StateConnected                  // 1
+    StateError                      // 2
+    StateRetrying                   // 3
+)
+
+### iota expliqué
+- COMPTEUR AUTOMATIQUE : Commence à 0, s'incrémente automatiquement
+- RÉINITIALISATION : Repart à 0 dans chaque bloc const
+- EXPRESSION : Peut être utilisé dans des calculs (iota * 2, 1 << iota)
+
+### 7.16.3 Mapping vers des chaînes
+
+### Table de correspondance
+var stateName = map[ServerState]string{
+    StateIdle:      "idle",
+    StateConnected: "connected",
+    StateError:     "error",
+    StateRetrying:  "retrying",
+}
+
+### Avantages du mapping
+- LISIBILITÉ : Noms explicites pour l'affichage
+- CENTRALISATION : Un seul endroit pour les libellés
+- MAINTENANCE : Facile de modifier les textes
+
+### 7.16.4 Interface Stringer
+
+### Implémentation de String()
+func (ss ServerState) String() string {
+    return stateName[ss]
+}
+
+### Avantages de Stringer
+- AFFICHAGE AUTOMATIQUE : fmt.Println() utilise String()
+- INTÉGRATION : Fonctionne avec tous les outils Go
+- DEBUGGING : Messages d'erreur plus lisibles
+- LOGS : Affichage naturel dans les logs
+
+### Exemple d'usage
+state := StateConnected
+fmt.Println(state)                    // Affiche: "connected"
+fmt.Printf("État: %v\n", state)      // Affiche: "État: connected"
+
+### 7.16.5 Machine à états avec switch
+
+### Fonction de transition
+func transition(s ServerState) ServerState {
+    switch s {
+    case StateIdle:
+        return StateConnected
+    case StateConnected, StateRetrying:    // Cas multiples
+        return StateIdle
+    case StateError:
+        return StateRetrying
+    default:
+        panic(fmt.Errorf("unknown state: %s", s))
+    }
+}
+
+### Gestion d'erreur robuste
+func (ss ServerState) String() string {
+    if name, ok := stateName[ss]; ok {
+        return name
+    }
+    return fmt.Sprintf("ServerState(%d)", int(ss))
+}
+
+### 7.16.6 Énumérations avec valeurs personnalisées
+
+### Avec des valeurs spécifiques
+type Priority int
+
+const (
+    Low Priority = iota * 10        // 0
+    Medium                          // 10
+    High                            // 20
+    Critical                        // 30
+)
+
+### Avec des puissances de 2 (flags)
+type Permission int
+
+const (
+    Read Permission = 1 << iota     // 1 (001)
+    Write                           // 2 (010)
+    Execute                         // 4 (100)
+)
+
+### Combinaison de flags
+fullAccess := Read | Write | Execute  // 7 (111)
+
+### 7.16.7 Énumérations basées sur string
+
+### Type string pour plus de lisibilité
+type Color string
+
+const (
+    Red   Color = "red"
+    Green Color = "green"
+    Blue  Color = "blue"
+)
+
+### Avantages des string enums
+- SÉRIALISATION JSON naturelle
+- DEBUGGING plus facile
+- INTEROPÉRABILITÉ avec autres systèmes
+
+### 7.16.8 Validation et sécurité
+
+### Fonction de validation
+func (ss ServerState) IsValid() bool {
+    switch ss {
+    case StateIdle, StateConnected, StateError, StateRetrying:
+        return true
+    default:
+        return false
+    }
+}
+
+### Parse depuis string
+func ParseServerState(s string) (ServerState, error) {
+    for state, name := range stateName {
+        if name == s {
+            return state, nil
+        }
+    }
+    return StateIdle, fmt.Errorf("invalid state: %s", s)
+}
+
+### 7.16.9 Énumérations avec méthodes
+
+### Ajout de comportements
+func (ss ServerState) CanTransitionTo(target ServerState) bool {
+    switch ss {
+    case StateIdle:
+        return target == StateConnected
+    case StateConnected:
+        return target == StateIdle || target == StateError
+    case StateError:
+        return target == StateRetrying
+    case StateRetrying:
+        return target == StateIdle || target == StateConnected
+    default:
+        return false
+    }
+}
+
+### Usage avec méthodes
+current := StateIdle
+if current.CanTransitionTo(StateConnected) {
+    current = StateConnected
+}
+
+### 7.16.10 Bonnes pratiques avec les énumérations
+
+### Nommage
+- PRÉFIXE COMMUN : StateIdle, StateConnected (évite les conflits)
+- CAMELCASE : Première lettre majuscule pour export
+- DESCRIPTIF : Noms clairs et explicites
+
+### Organisation
+- GROUPER : Toutes les constantes dans le même bloc
+- DOCUMENTER : Commentaires pour les valeurs importantes
+- VALIDER : Fonctions IsValid() pour la sécurité
+
+### Performance
+- TYPE NUMÉRIQUE : Plus rapide que string pour les comparaisons
+- TABLE DE MAPPING : Plus efficace que switch pour String()
+- CONST : Évaluées à la compilation, pas de surcharge runtime
+
+### Sécurité
+- VALIDATION : Vérifiez toujours les valeurs entrantes
+- DEFAULT CASE : Gérez les valeurs inconnues
+- TYPE SAFETY : Utilisez des types personnalisés
+
+### 7.16.11 Exemple complet d'énumération
+
+```go
+package main
+
+import "fmt"
+
+// Définition du type enum
+type OrderStatus int
+
+// Constantes avec iota
+const (
+    Pending OrderStatus = iota
+    Processing
+    Shipped
+    Delivered
+    Cancelled
+)
+
+// Table de mapping
+var statusNames = map[OrderStatus]string{
+    Pending:    "pending",
+    Processing: "processing", 
+    Shipped:    "shipped",
+    Delivered:  "delivered",
+    Cancelled:  "cancelled",
+}
+
+// Interface Stringer
+func (os OrderStatus) String() string {
+    if name, ok := statusNames[os]; ok {
+        return name
+    }
+    return fmt.Sprintf("OrderStatus(%d)", int(os))
+}
+
+// Validation
+func (os OrderStatus) IsValid() bool {
+    return os >= Pending && os <= Cancelled
+}
+
+// Logique métier
+func (os OrderStatus) CanTransitionTo(target OrderStatus) bool {
+    switch os {
+    case Pending:
+        return target == Processing || target == Cancelled
+    case Processing:
+        return target == Shipped || target == Cancelled
+    case Shipped:
+        return target == Delivered
+    default:
+        return false
+    }
+}
+
+func main() {
+    order := Pending
+    fmt.Printf("Statut initial: %s\n", order)
+    
+    if order.CanTransitionTo(Processing) {
+        order = Processing
+        fmt.Printf("Nouveau statut: %s\n", order)
+    }
+}
+```
+
+### 7.17 EMBEDDING DE STRUCTURES EN GO
+
+### 7.17.1 Concept d'embedding (composition)
+
+### Alternative à l'héritage
+- Go N'A PAS d'héritage classique comme Java/C#
+- COMPOSITION privilégiée sur l'héritage
+- EMBEDDING = inclure une structure dans une autre
+- PROMOTION automatique des champs et méthodes
+
+### 7.17.2 Syntaxe de base
+
+### Structure de base
+type base struct {
+    num int
+}
+
+func (b base) describe() string {
+    return fmt.Sprintf("base with num: %v", b.num)
+}
+
+### Structure avec embedding
+type container struct {
+    base        // ← Champ anonyme (embedding)
+    str string  // ← Champ propre à container
+}
+
+### Caractéristiques de l'embedding
+- CHAMP ANONYME : Pas de nom explicite pour le champ embedé
+- TYPE COMPLET : Le type entier est embedé, pas juste ses champs
+- EXTENSION : La structure peut ajouter ses propres champs et méthodes
+
+### 7.17.3 Promotion de champs
+
+### Accès direct aux champs embedés
+co := container{
+    base: base{num: 1},
+    str: "some name",
+}
+
+// ACCÈS DIRECT (promotion)
+fmt.Println(co.num)        // Équivalent à co.base.num
+
+// ACCÈS EXPLICITE
+fmt.Println(co.base.num)   // Accès traditionnel via le champ
+
+### Règles de promotion
+- CHAMPS PUBLICS : Automatiquement promus
+- CONFLITS : En cas de collision, accès explicite requis
+- NIVEAUX : Promotion sur plusieurs niveaux d'embedding
+
+### 7.17.4 Promotion de méthodes
+
+### Méthodes automatiquement disponibles
+// La méthode describe() de base est disponible sur container
+fmt.Println(co.describe())  // Appelle base.describe()
+
+### Mécanisme de promotion
+- MÉTHODES PUBLIQUES : Automatiquement promues
+- RECEIVER : Méthode appelée sur la structure embedée
+- INTERFACE : Peut satisfaire des interfaces via embedding
+
+### 7.17.5 Interfaces et embedding
+
+### Satisfaction d'interface automatique
+type describer interface {
+    describe() string
+}
+
+var d describer = co        // ✅ container satisfait describer
+fmt.Println(d.describe())   // Via la méthode de base
+
+### Avantages pour les interfaces
+- IMPLÉMENTATION AUTOMATIQUE : Pas besoin de réécrire les méthodes
+- COMPOSITION D'INTERFACES : Combiner plusieurs interfaces
+- POLYMORPHISME : Types composés utilisables partout
+
+### 7.17.6 Embedding multiple
+
+### Plusieurs structures embedées
+type reader struct {
+    source string
+}
+
+func (r reader) read() string {
+    return r.source
+}
+
+type writer struct {
+    destination string
+}
+
+func (w writer) write(data string) {
+    w.destination = data
+}
+
+type readWriter struct {
+    reader
+    writer
+    buffer string
+}
+
+### Usage de l'embedding multiple
+rw := readWriter{
+    reader: reader{source: "input"},
+    writer: writer{destination: "output"},
+    buffer: "temp",
+}
+
+// Accès aux méthodes des deux structures
+data := rw.read()           // De reader
+rw.write("new data")        // De writer
+
+### 7.17.7 Conflits et résolution
+
+### Gestion des conflits de noms
+type A struct {
+    name string
+}
+
+type B struct {
+    name string
+}
+
+type Combined struct {
+    A
+    B
+    ownName string
+}
+
+### Résolution des conflits
+c := Combined{}
+// c.name        // ❌ ERREUR : Ambigu
+c.A.name         // ✅ OK : Accès explicite à A.name
+c.B.name         // ✅ OK : Accès explicite à B.name
+c.ownName        // ✅ OK : Champ propre
+
+### 7.17.8 Embedding avec interfaces
+
+### Embedding d'interfaces
+type Reader interface {
+    Read() string
+}
+
+type Writer interface {
+    Write(string)
+}
+
+type ReadWriter interface {
+    Reader          // Embedding d'interface
+    Writer          // Embedding d'interface
+}
+
+### Implémentation par embedding
+type File struct {
+    name string
+}
+
+func (f File) Read() string { return f.name }
+func (f File) Write(s string) { f.name = s }
+
+type Document struct {
+    File            // Embedding de structure
+    content string
+}
+
+// Document implémente automatiquement ReadWriter !
+
+### 7.17.9 Redéfinition de méthodes
+
+### Override de méthodes embedées
+type base struct {
+    value int
+}
+
+func (b base) display() string {
+    return fmt.Sprintf("base: %d", b.value)
+}
+
+type enhanced struct {
+    base
+    extra string
+}
+
+// Redéfinition de la méthode
+func (e enhanced) display() string {
+    return fmt.Sprintf("enhanced: %d + %s", e.value, e.extra)
+}
+
+### Comportement de redéfinition
+e := enhanced{base: base{value: 42}, extra: "test"}
+fmt.Println(e.display())        // "enhanced: 42 + test"
+fmt.Println(e.base.display())   // "base: 42"
+
+### 7.17.10 Patterns courants avec embedding
+
+### Extension de types externes
+import "time"
+
+type CustomTime struct {
+    time.Time               // Embedding du type Time
+    timezone string
+}
+
+func (ct CustomTime) Display() string {
+    return fmt.Sprintf("%s (%s)", ct.Format("15:04"), ct.timezone)
+}
+
+### Composition de fonctionnalités
+type Logger struct {
+    prefix string
+}
+
+func (l Logger) Log(msg string) {
+    fmt.Printf("[%s] %s\n", l.prefix, msg)
+}
+
+type Service struct {
+    Logger              // Embedding pour logging
+    name string
+    port int
+}
+
+func (s Service) Start() {
+    s.Log(fmt.Sprintf("Starting %s on port %d", s.name, s.port))
+}
+
+### 7.17.11 Avantages de l'embedding
+
+### Réutilisabilité
+- PARTAGE DE COMPORTEMENTS : Réutilisation de méthodes existantes
+- COMPOSITION FLEXIBLE : Combiner différentes fonctionnalités
+- ÉVITER LA DUPLICATION : Pas besoin de réécrire du code
+
+### Maintenabilité
+- SÉPARATION DES RESPONSABILITÉS : Chaque structure a son rôle
+- MODIFICATIONS LOCALISÉES : Changements dans une seule structure
+- TESTS UNITAIRES : Tester chaque composant séparément
+
+### Performance
+- PAS DE SURCHARGE : Pas d'indirection supplémentaire
+- INLINING : Compilateur peut optimiser les accès
+- MÉMOIRE : Allocation contiguë des champs
+
+### 7.17.12 Quand utiliser l'embedding
+
+### Cas d'usage recommandés
+- EXTENSION DE TYPES : Ajouter des fonctionnalités à des types existants
+- COMPOSITION D'INTERFACES : Créer des interfaces complexes
+- PARTAGE DE COMPORTEMENTS : Réutiliser du code commun
+- POLYMORPHISME : Créer des hiérarchies flexibles
+
+### Alternatives à considérer
+- COMPOSITION EXPLICITE : Avec des champs nommés
+- INTERFACES : Pour le polymorphisme pur
+- FONCTIONS : Pour la logique stateless
+
+### 7.17.13 Bonnes pratiques
+
+### Design
+- COHÉRENCE : Embedder des types logiquement liés
+- SIMPLICITÉ : Éviter l'embedding trop profond
+- INTERFACE-FIRST : Définir les interfaces avant les implémentations
+- DOCUMENTATION : Clarifier les relations d'embedding
+
+### Nommage
+- TYPES CLAIRS : Noms expressifs pour les structures
+- ÉVITER LES CONFLITS : Prévenir les collisions de noms
+- CONVENTIONS : Suivre les standards Go
+
+### Performance
+- ÉVITER L'OVER-EMBEDDING : Ne pas embedder inutilement
+- CONSIDÉRER LA TAILLE : Impact sur la mémoire
+- PROFILER : Mesurer les performances en cas de doute
+
+### 7.17.14 Exemple complet d'embedding
+
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+// Structure de base pour l'audit
+type Auditable struct {
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    CreatedBy string
+}
+
+func (a *Auditable) SetCreated(by string) {
+    a.CreatedAt = time.Now()
+    a.CreatedBy = by
+}
+
+func (a *Auditable) SetUpdated() {
+    a.UpdatedAt = time.Now()
+}
+
+// Interface pour les entités identifiables
+type Identifiable interface {
+    GetID() int
+    SetID(int)
+}
+
+// Structure pour l'identification
+type Entity struct {
+    ID int
+}
+
+func (e Entity) GetID() int { return e.ID }
+func (e *Entity) SetID(id int) { e.ID = id }
+
+// Modèle utilisateur avec embedding
+type User struct {
+    Entity          // Embedding pour l'ID
+    Auditable       // Embedding pour l'audit
+    Username string
+    Email    string
+}
+
+func (u User) String() string {
+    return fmt.Sprintf("User{ID: %d, Username: %s, Email: %s}", 
+        u.ID, u.Username, u.Email)
+}
+
+func main() {
+    user := User{
+        Username: "alice",
+        Email:    "alice@example.com",
+    }
+    
+    // Utilisation des méthodes embedées
+    user.SetID(1)
+    user.SetCreated("admin")
+    
+    // User satisfait automatiquement Identifiable
+    var entity Identifiable = user
+    fmt.Printf("ID: %d\n", entity.GetID())
+    
+    // Accès direct aux champs embedés
+    fmt.Printf("Created at: %s\n", user.CreatedAt.Format("2006-01-02"))
+    
+    fmt.Println(user)
+}
+```
+
+### 7.18 GÉNÉRIQUES (GENERICS) EN GO
+
+### 7.18.1 Introduction aux génériques
+
+### Génériques introduits en Go 1.18
+- PARAMÈTRES DE TYPE : Types comme paramètres de fonctions/structures
+- TYPE SAFETY : Sécurité des types à la compilation
+- RÉUTILISABILITÉ : Code générique réutilisable
+- PERFORMANCE : Pas de boxing/unboxing comme interface{}
+
+### 7.18.2 Fonction générique simple
+
+### Syntaxe de base
+func Print[T any](s []T) {
+    for _, v := range s {
+        fmt.Print(v)
+    }
+}
+
+### Composants
+- [T any] : Paramètre de type T qui peut être n'importe quoi
+- T : Utilisé comme type dans les paramètres et variables
+- INFÉRENCE : Go déduit automatiquement le type
+
+### Usage
+Print([]int{1, 2, 3})        // T inféré comme int
+Print([]string{"a", "b"})    // T inféré comme string
+
+### 7.18.3 Contraintes de types
+
+### Contrainte any
+func Print[T any](s []T)     // T peut être n'importe quel type
+
+### Contrainte comparable
+func Equal[T comparable](a, b T) bool {
+    return a == b
+}
+
+### Types comparable
+- NOMBRES : int, float64, etc.
+- STRINGS : string
+- BOOLÉENS : bool  
+- POINTEURS : *T
+- ARRAYS : [n]T si T est comparable
+- STRUCTS : si tous les champs sont comparables
+
+### 7.18.4 Contraintes d'interface personnalisées
+
+### Interface comme contrainte
+type Person interface {
+    Work()
+}
+
+type worker string
+
+func (w worker) Work() {
+    fmt.Printf("%s is working\n", w)
+}
+
+func DoWork[T Person](things []T) {
+    for _, v := range things {
+        v.Work()
+    }
+}
+
+### Avantages
+- POLYMORPHISME : Fonctionne avec tout type implémentant Person
+- TYPE SAFETY : Garantit que T a la méthode Work()
+- FLEXIBILITÉ : Nouveaux types peuvent être ajoutés facilement
+
+### 7.18.5 Union de types (Type Sets)
+
+### Contrainte union
+type Number interface {
+    int | float64
+}
+
+func MultiplyTen[T Number](a T) T {
+    return a * 10
+}
+
+### Utilisation des unions
+- OPÉRATEURS : Permettent l'utilisation d'opérateurs arithmétiques
+- LIMITATION : Restreint aux types spécifiés
+- EXTENSIBILITÉ : Facile d'ajouter de nouveaux types
+
+### Exemple d'usage
+result1 := MultiplyTen(10)      // int -> 100
+result2 := MultiplyTen(5.55)    // float64 -> 55.5
+
+### 7.18.6 Types génériques personnalisés
+
+### Définition d'un type générique
+type GenericSlice[T any] []T
+
+### Méthodes sur types génériques
+func (g GenericSlice[T]) Print() {
+    for _, v := range g {
+        fmt.Println(v)
+    }
+}
+
+### Fonctions avec types génériques
+func PrintNew[T any](g GenericSlice[T]) {
+    for _, v := range g {
+        fmt.Println(v)
+    }
+}
+
+### Usage
+g := GenericSlice[int]{1, 2, 3}
+g.Print()       // Méthode du type
+PrintNew(g)     // Fonction externe
+
+### 7.18.7 Structures génériques complexes
+
+### Liste chaînée générique
+type List[T any] struct {
+    head, tail *element[T]
+}
+
+type element[T any] struct {
+    next *element[T]
+    val  T
+}
+
+### Méthodes sur structures génériques
+func (lst *List[T]) Push(v T) {
+    if lst.tail == nil {
+        lst.head = &element[T]{val: v}
+        lst.tail = lst.head
+    } else {
+        lst.tail.next = &element[T]{val: v}
+        lst.tail = lst.tail.next
+    }
+}
+
+func (lst *List[T]) AllElements() []T {
+    var elems []T
+    for e := lst.head; e != nil; e = e.next {
+        elems = append(elems, e.val)
+    }
+    return elems
+}
+
+### 7.18.8 Fonctions génériques avancées
+
+### Fonction de recherche dans slice
+func SlicesIndex[S ~[]E, E comparable](s S, v E) int {
+    for i := range s {
+        if v == s[i] {
+            return i
+        }
+    }
+    return -1
+}
+
+### Contraintes avancées
+- S ~[]E : S doit être basé sur le type sous-jacent []E
+- E comparable : E doit être comparable
+- APPROXIMATION (~) : Permet les types dérivés
+
+### Usage avec types personnalisés
+type MyStrings []string         // Type basé sur []string
+ms := MyStrings{"a", "b", "c"}
+index := SlicesIndex(ms, "b")   // Fonctionne grâce à ~[]E
+
+### 7.18.9 Inférence de type
+
+### Inférence automatique
+nums := []int{1, 2, 3}
+Print(nums)                     // T inféré comme int
+
+### Spécification explicite
+Print[int](nums)                // Type explicitement spécifié
+
+### Cas où l'inférence échoue
+- PARAMÈTRES AMBIGUS : Plusieurs interprétations possibles
+- TYPES COMPLEXES : Contraintes complexes
+- RETOUR SEUL : Quand seul le type de retour utilise T
+
+### 7.18.10 Patterns courants avec génériques
+
+### Map générique
+func Map[T, U any](slice []T, fn func(T) U) []U {
+    result := make([]U, len(slice))
+    for i, v := range slice {
+        result[i] = fn(v)
+    }
+    return result
+}
+
+### Filter générique
+func Filter[T any](slice []T, predicate func(T) bool) []T {
+    var result []T
+    for _, v := range slice {
+        if predicate(v) {
+            result = append(result, v)
+        }
+    }
+    return result
+}
+
+### Reduce générique
+func Reduce[T, U any](slice []T, initial U, fn func(U, T) U) U {
+    result := initial
+    for _, v := range slice {
+        result = fn(result, v)
+    }
+    return result
+}
+
+### 7.18.11 Contraintes prédéfinies
+
+### golang.org/x/exp/constraints
+import "golang.org/x/exp/constraints"
+
+type Signed = constraints.Signed       // int, int8, int16, int32, int64
+type Unsigned = constraints.Unsigned   // uint, uint8, uint16, uint32, uint64
+type Integer = constraints.Integer     // Signed | Unsigned
+type Float = constraints.Float         // float32, float64
+type Ordered = constraints.Ordered     // Integer | Float | string
+
+### Exemple avec contraintes prédéfinies
+func Max[T constraints.Ordered](a, b T) T {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+### 7.18.12 Limitations et considérations
+
+### Limitations actuelles
+- PAS DE SPÉCIALISATION : Pas de versions spécialisées d'une fonction
+- PAS DE MÉTAPROGRAMMATION : Pas de génération de code à l'exécution
+- COMPLEXITÉ : Syntaxe parfois lourde pour des cas simples
+
+### Considérations de performance
+- COMPILATION : Génération de code spécialisé
+- PAS DE BOXING : Évite les conversions vers interface{}
+- INLINING : Optimisations possibles par le compilateur
+
+### 7.18.13 Quand utiliser les génériques
+
+### Cas d'usage recommandés
+- COLLECTIONS : Slices, maps, structures de données
+- ALGORITHMES : Tri, recherche, transformation
+- UTILITAIRES : Fonctions réutilisables sur différents types
+- API : Quand plusieurs types similaires sont supportés
+
+### Quand préférer les interfaces
+- POLYMORPHISME DYNAMIQUE : Types déterminés à l'exécution
+- FLEXIBILITÉ : Besoin d'ajouter des types sans recompilation
+- SIMPLICITÉ : Cas simples avec peu de types
+
+### 7.18.14 Bonnes pratiques
+
+### Design des contraintes
+- MINIMALES : Utiliser les contraintes les plus simples possibles
+- EXPRESSIVES : Noms clairs pour les contraintes personnalisées
+- RÉUTILISABLES : Définir des contraintes réutilisables
+
+### Nommage
+- TYPES COURTS : T, U, V pour les paramètres simples
+- DESCRIPTIFS : Element, Key, Value pour des rôles spécifiques
+- CONVENTIONS : Suivre les standards de la communauté
+
+### 7.18.15 Exemple complet d'application
+
+```go
+package main
+
+import (
+    "fmt"
+    "golang.org/x/exp/constraints"
+)
+
+// Contrainte personnalisée
+type Numeric interface {
+    constraints.Integer | constraints.Float
+}
+
+// Calculatrice générique
+type Calculator[T Numeric] struct {
+    values []T
+}
+
+func NewCalculator[T Numeric]() *Calculator[T] {
+    return &Calculator[T]{values: make([]T, 0)}
+}
+
+func (c *Calculator[T]) Add(value T) {
+    c.values = append(c.values, value)
+}
+
+func (c *Calculator[T]) Sum() T {
+    var sum T
+    for _, v := range c.values {
+        sum += v
+    }
+    return sum
+}
+
+func (c *Calculator[T]) Average() T {
+    if len(c.values) == 0 {
+        return T(0)
+    }
+    return c.Sum() / T(len(c.values))
+}
+
+func (c *Calculator[T]) Max() T {
+    if len(c.values) == 0 {
+        return T(0)
+    }
+    max := c.values[0]
+    for _, v := range c.values[1:] {
+        if v > max {
+            max = v
+        }
+    }
+    return max
+}
+
+func main() {
+    // Calculatrice pour entiers
+    intCalc := NewCalculator[int]()
+    intCalc.Add(10)
+    intCalc.Add(20)
+    intCalc.Add(30)
+    fmt.Printf("Sum: %d, Average: %d, Max: %d\n", 
+        intCalc.Sum(), intCalc.Average(), intCalc.Max())
+    
+    // Calculatrice pour float64
+    floatCalc := NewCalculator[float64]()
+    floatCalc.Add(1.5)
+    floatCalc.Add(2.7)
+    floatCalc.Add(3.2)
+    fmt.Printf("Sum: %.2f, Average: %.2f, Max: %.2f\n", 
+        floatCalc.Sum(), floatCalc.Average(), floatCalc.Max())
+}
+```
+
+### 7.19 ITÉRATEURS (RANGE OVER ITERATORS) EN GO
+
+### 7.19.1 Introduction aux itérateurs
+
+### Itérateurs introduits en Go 1.23
+- PACKAGE ITER : Types iter.Seq[T] et iter.Seq2[K,V]
+- RANGE ÉTENDU : Support du range sur types personnalisés
+- LAZY EVALUATION : Génération à la demande
+- COMPOSABILITÉ : Chaînage et transformation d'itérateurs
+
+### 7.19.2 Package iter et types de base
+
+### Import nécessaire
+import (
+    "iter"
+    "slices"
+)
+
+### Types d'itérateurs
+- iter.Seq[T] : Séquence d'éléments de type T
+- iter.Seq2[K, V] : Séquence de paires clé-valeur
+
+### Signature d'un itérateur
+type Seq[V any] func(yield func(V) bool)
+// yield : fonction qui produit la prochaine valeur
+// bool : true continue, false arrête l'itération
+
+### 7.19.3 Implémentation d'itérateur personnalisé
+
+### Structure avec itérateur
+type List[T any] struct {
+    head, tail *element[T]
+}
+
+type element[T any] struct {
+    next *element[T]
+    val  T
+}
+
+### Méthode itérateur
+func (lst *List[T]) All() iter.Seq[T] {
+    return func(yield func(T) bool) {
+        for e := lst.head; e != nil; e = e.next {
+            if !yield(e.val) {
+                return
+            }
+        }
+    }
+}
+
+### Composants clés
+- RETOUR FONCTION : iter.Seq[T] est une fonction
+- YIELD : Produit la prochaine valeur
+- CONTRÔLE D'ARRÊT : Si yield retourne false, on arrête
+- PUSH ITERATOR : L'itérateur "pousse" les valeurs
+
+### 7.19.4 Générateur infini
+
+### Suite de Fibonacci infinie
+func genFib() iter.Seq[int] {
+    return func(yield func(int) bool) {
+        a, b := 1, 1
+        
+        for {
+            if !yield(a) {
+                return
+            }
+            a, b = b, a+b
+        }
+    }
+}
+
+### Caractéristiques
+- BOUCLE INFINIE : for {} avec génération continue
+- LAZY : Calculs uniquement à la demande
+- CONTRÔLABLE : Le consommateur peut arrêter avec break
+- MÉMOIRE CONSTANTE : Pas de stockage de toute la séquence
+
+### 7.19.5 Utilisation avec range
+
+### Itération sur structure personnalisée
+for e := range lst.All() {
+    fmt.Println(e)
+}
+
+### Collecte en slice
+all := slices.Collect(lst.All())
+fmt.Println("all:", all)
+
+### Itération avec condition d'arrêt
+for n := range genFib() {
+    if n >= 10 {
+        break
+    }
+    fmt.Println(n)
+}
+
+### Mécanismes
+- RANGE ÉTENDU : Fonctionne avec iter.Seq[T]
+- BREAK SUPPORT : Arrêt prématuré possible
+- SLICES.COLLECT : Conversion itérateur → slice
+
+### 7.19.6 Pattern d'implémentation
+
+### Structure type d'un itérateur
+func MyIterator[T any]() iter.Seq[T] {
+    return func(yield func(T) bool) {
+        // Initialisation
+        
+        for /* condition */ {
+            value := /* calcul prochaine valeur */
+            
+            if !yield(value) {
+                return // Utilisateur a fait break
+            }
+            
+            // Mise à jour pour prochaine itération
+        }
+    }
+}
+
+### Bonnes pratiques
+- VÉRIFIER YIELD : Toujours tester le retour de yield
+- GESTION D'ÉTAT : Maintenir l'état entre appels
+- CLEANUP : Nettoyer les ressources si nécessaire
+
+### 7.19.7 Itérateurs avec paires clé-valeur
+
+### Structure map personnalisée
+type MyMap[K comparable, V any] struct {
+    data map[K]V
+}
+
+### Itérateur clé-valeur
+func (m MyMap[K, V]) All() iter.Seq2[K, V] {
+    return func(yield func(K, V) bool) {
+        for key, value := range m.data {
+            if !yield(key, value) {
+                return
+            }
+        }
+    }
+}
+
+### Usage
+for key, value := range myMap.All() {
+    fmt.Printf("%v: %v\n", key, value)
+}
+
+### 7.19.8 Fonctions utilitaires avec itérateurs
+
+### Package slices étendu
+all := slices.Collect(lst.All())           // iter.Seq[T] → []T
+sorted := slices.Sorted(lst.All())         // Collecte et trie
+values := slices.Values(mySlice)           // []T → iter.Seq[T]
+
+### Fonctions de transformation
+func Filter[T any](seq iter.Seq[T], predicate func(T) bool) iter.Seq[T] {
+    return func(yield func(T) bool) {
+        for v := range seq {
+            if predicate(v) {
+                if !yield(v) {
+                    return
+                }
+            }
+        }
+    }
+}
+
+func Map[T, U any](seq iter.Seq[T], transform func(T) U) iter.Seq[U] {
+    return func(yield func(U) bool) {
+        for v := range seq {
+            if !yield(transform(v)) {
+                return
+            }
+        }
+    }
+}
+
+### 7.19.9 Chaînage d'itérateurs
+
+### Composition fonctionnelle
+numbers := slices.Values([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+filtered := Filter(numbers, func(x int) bool { return x%2 == 0 })
+doubled := Map(filtered, func(x int) int { return x * 2 })
+
+for result := range doubled {
+    fmt.Println(result) // 4, 8, 12, 16, 20
+}
+
+### Avantages du chaînage
+- LISIBILITÉ : Pipeline de transformation clair
+- EFFICACITÉ : Pas de stockage intermédiaire
+- LAZY : Évaluation paresseuse bout en bout
+
+### 7.19.10 Cas d'usage courants
+
+### Parcours de structures de données
+- ARBRES : Parcours en profondeur/largeur
+- GRAPHES : Exploration de nœuds
+- LISTES CHAÎNÉES : Parcours séquentiel
+- BASES DE DONNÉES : Résultats en streaming
+
+### Générateurs de données
+- SÉQUENCES MATHÉMATIQUES : Fibonacci, nombres premiers
+- DONNÉES DE TEST : Génération aléatoire
+- CONFIGURATION : Permutations, combinaisons
+
+### Pipeline de traitement
+- FICHIERS : Lecture ligne par ligne
+- RÉSEAU : Traitement de flux de données
+- TRANSFORMATION : ETL (Extract, Transform, Load)
+
+### 7.19.11 Comparaison avec approches traditionnelles
+
+### Itérateurs vs Slices
+| Aspect | Itérateurs | Slices |
+|--------|------------|--------|
+| Mémoire | Constante | Proportionnelle |
+| Évaluation | Lazy | Eager |
+| Arrêt précoce | Oui | Non optimisé |
+| Composabilité | Excellente | Limitée |
+| Performance | Variable | Prévisible |
+
+### Itérateurs vs Channels
+| Aspect | Itérateurs | Channels |
+|--------|------------|----------|
+| Concurrence | Non | Oui |
+| Simplicité | Plus simple | Plus complexe |
+| Overhead | Minimal | Buffer + goroutines |
+| Contrôle | Pull-based | Push-based |
+
+### 7.19.12 Performance et considérations
+
+### Avantages performance
+- MÉMOIRE : Pas d'allocation de slices intermédiaires
+- LAZY : Calculs uniquement si nécessaires
+- ARRÊT PRÉCOCE : Économie de calculs inutiles
+- CACHE : Meilleure localité des données
+
+### Considérations
+- OVERHEAD : Appels de fonction supplémentaires
+- DEBUGGING : Plus difficile à déboguer
+- COMPATIBILITÉ : Nécessite Go 1.23+
+- COMPLEXITÉ : Plus complexe que les boucles simples
+
+### 7.19.13 Patterns avancés
+
+### Itérateur avec état
+func Counter(start, step int) iter.Seq[int] {
+    return func(yield func(int) bool) {
+        current := start
+        for {
+            if !yield(current) {
+                return
+            }
+            current += step
+        }
+    }
+}
+
+### Itérateur avec limite
+func Take[T any](seq iter.Seq[T], n int) iter.Seq[T] {
+    return func(yield func(T) bool) {
+        count := 0
+        for v := range seq {
+            if count >= n {
+                return
+            }
+            if !yield(v) {
+                return
+            }
+            count++
+        }
+    }
+}
+
+### Usage combiné
+for n := range Take(Counter(0, 2), 5) {
+    fmt.Println(n) // 0, 2, 4, 6, 8
+}
+
+### 7.19.14 Gestion des ressources
+
+### Itérateur avec cleanup
+func ReadLines(filename string) iter.Seq[string] {
+    return func(yield func(string) bool) {
+        file, err := os.Open(filename)
+        if err != nil {
+            return
+        }
+        defer file.Close()
+        
+        scanner := bufio.NewScanner(file)
+        for scanner.Scan() {
+            if !yield(scanner.Text()) {
+                return
+            }
+        }
+    }
+}
+
+### Pattern de ressources
+- DEFER : Toujours nettoyer les ressources
+- EARLY RETURN : Respecter l'arrêt prématuré
+- ERROR HANDLING : Gérer les erreurs proprement
+
+### 7.19.15 Bonnes pratiques
+
+### Conception d'itérateurs
+- SINGLE RESPONSIBILITY : Un itérateur, une responsabilité
+- LAZY PAR DÉFAUT : Éviter les calculs prématurés
+- YIELD CHECKING : Toujours vérifier le retour de yield
+- ÉTAT MINIMAL : Garder l'état minimal nécessaire
+
+### Nommage et documentation
+- NOMS DESCRIPTIFS : All(), Values(), Keys()
+- DOCUMENTATION : Expliquer le comportement lazy
+- EXEMPLES : Montrer l'usage typique
+
+### Performance
+- PROFILING : Mesurer vs solutions alternatives
+- INLINING : Préférer les petites fonctions
+- ALLOCATION : Éviter les allocations dans les boucles
+
+### 7.19.16 Exemple complet d'application
+
+```go
+package main
+
+import (
+    "fmt"
+    "iter"
+    "slices"
+    "strings"
+)
+
+// Structure pour un arbre binaire
+type TreeNode[T any] struct {
+    Value T
+    Left  *TreeNode[T]
+    Right *TreeNode[T]
+}
+
+// Itérateur pour parcours en ordre
+func (node *TreeNode[T]) InOrder() iter.Seq[T] {
+    return func(yield func(T) bool) {
+        var traverse func(*TreeNode[T]) bool
+        traverse = func(n *TreeNode[T]) bool {
+            if n == nil {
+                return true
+            }
+            
+            if !traverse(n.Left) {
+                return false
+            }
+            
+            if !yield(n.Value) {
+                return false
+            }
+            
+            return traverse(n.Right)
+        }
+        
+        traverse(node)
+    }
+}
+
+// Utilitaires de transformation
+func Filter[T any](seq iter.Seq[T], predicate func(T) bool) iter.Seq[T] {
+    return func(yield func(T) bool) {
+        for v := range seq {
+            if predicate(v) {
+                if !yield(v) {
+                    return
+                }
+            }
+        }
+    }
+}
+
+func Map[T, U any](seq iter.Seq[T], transform func(T) U) iter.Seq[U] {
+    return func(yield func(U) bool) {
+        for v := range seq {
+            if !yield(transform(v)) {
+                return
+            }
+        }
+    }
+}
+
+func main() {
+    // Construction d'un arbre
+    root := &TreeNode[int]{
+        Value: 5,
+        Left: &TreeNode[int]{
+            Value: 3,
+            Left:  &TreeNode[int]{Value: 1},
+            Right: &TreeNode[int]{Value: 4},
+        },
+        Right: &TreeNode[int]{
+            Value: 8,
+            Left:  &TreeNode[int]{Value: 7},
+            Right: &TreeNode[int]{Value: 9},
+        },
+    }
+    
+    // Pipeline de transformation avec itérateurs
+    evenDoubled := Map(
+        Filter(root.InOrder(), func(x int) bool { return x%2 == 0 }),
+        func(x int) string { return fmt.Sprintf("even_%d", x*2) },
+    )
+    
+    // Collecte du résultat
+    result := slices.Collect(evenDoubled)
+    fmt.Println("Résultat:", strings.Join(result, ", "))
+    
+    // Parcours avec arrêt prématuré
+    fmt.Println("Premiers nombres > 3:")
+    count := 0
+    for value := range root.InOrder() {
+        if value > 3 {
+            fmt.Println(value)
+            count++
+            if count >= 3 {
+                break
+            }
+        }
+    }
+}
+```
+
+## 8. STRUCTURE D'UN PROGRAMME GO
+
+```go
+package main           // Déclaration du package
+import "fmt"          // Import des packages nécessaires
+
+func main() {         // Fonction principale
+    // Code ici
+}
+```
+
+## 9. BONNES PRATIQUES
+
+- Utilisez := pour les nouvelles variables dans les fonctions
+- Utilisez var pour les variables au niveau package
+- Utilisez const pour les valeurs qui ne changent jamais
+- Préférez les constantes non typées pour plus de flexibilité
+- Groupez les constantes liées avec const ()
+- Nommez les constantes en MAJUSCULES pour les exports publics
+- Utilisez if avec déclaration courte pour limiter la portée des variables
+- Préférez switch à de multiples if/else pour la lisibilité
+- Utilisez Type Switch pour gérer différents types
+- Utilisez l'opérateur modulo % pour tester la parité et la divisibilité
+- Combinez les conditions avec &&, || et !
+- Préférez les slices aux arrays pour la flexibilité
+- Utilisez make() avec capacité pour optimiser les performances
+- Utilisez append() pour ajouter des éléments aux slices
+- Utilisez copy() pour copier des slices
+- Utilisez slices.Equal() pour comparer des slices (Go 1.21+)
+- Utilisez maps pour les associations clé-valeur
+- Vérifiez l'existence des clés avec la syntaxe value, ok := map[key]
+- Utilisez delete() pour supprimer des éléments de maps
+- Utilisez clear() pour vider complètement une map (Go 1.21+)
+- Utilisez maps.Equal() pour comparer des maps (Go 1.21+)
+- Initialisez les maps avec make() ou des littéraux
+- Utilisez for range pour parcourir les collections
+- Utilisez _ pour ignorer les valeurs non utilisées dans range
+- Pré-allouez la capacité des slices si vous connaissez la taille approximative
+- Utilisez le slicing pour créer des sous-ensembles efficacement
+- Utilisez continue pour filtrer dans les boucles
+- Utilisez break pour sortir des boucles infinies
+- Appelez vos fonctions depuis main() pour qu'elles s'exécutent
+- fmt.Println() pour l'affichage simple
+- fmt.Printf() pour l'affichage formaté
+- Commentez votre code avec //
+- Définissez des structures pour grouper les données liées
+- Utilisez des constructeurs pour initialiser les structures de manière cohérente
+- Préférez l'initialisation avec noms de champs pour la clarté
+- Retournez des pointeurs pour les structures volumineuses
+- Utilisez la notation pointée (p.champ) pour accéder aux champs
+- Validez les données dans les fonctions constructeurs
+- Utilisez la composition plutôt que l'héritage avec les structures
+- Nommez les structures en CamelCase (majuscule pour export public)
+- Attachez des méthodes aux structures pour les comportements
+- Utilisez receiver par valeur pour la lecture, par pointeur pour la modification
+- Nommez les receivers avec la première lettre du type (r pour rect)
+- Préférez les méthodes aux fonctions pour l'organisation du code
+- Implémentez String() pour un affichage personnalisé des structures
+- Utilisez le chaînage de méthodes pour une syntaxe fluide
+- Définissez des interfaces pour créer des contrats flexibles
+- Utilisez l'implémentation implicite des interfaces (pas de "implements")
+- Préférez les petites interfaces (1-3 méthodes maximum)
+- Utilisez type assertion (v.(Type)) pour récupérer les types concrets
+- Employez type switch pour gérer plusieurs types d'interface
+- Nommez les interfaces avec le suffix -er (Reader, Writer, Stringer)
+- Acceptez des interfaces en paramètres, retournez des types concrets
+- Utilisez la composition d'interfaces pour la modularité
+
+## 10. RESSOURCES D'APPRENTISSAGE
+
+### Officielles
+- Tour of Go: https://go.dev/tour/
+- Go by Example: https://gobyexample.com/
+- Documentation: https://go.dev/doc/
+
+### Avec certificats
+- Coursera: "Programming with Google Go Specialization"
+- edX: "Introduction to Programming with Go"
+- Pluralsight: "Go Path"
+
+### Livres recommandés
+- "The Go Programming Language" (Donovan & Kernighan)
+- "Go in Action" (Manning)
+- "Learning Go" (O'Reilly) 
